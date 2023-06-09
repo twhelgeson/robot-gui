@@ -13,6 +13,24 @@ button.addEventListener('click', async function() {
 	await port.open({ baudRate: 9600 });
 
 	button.style.display = 'none'
+
+	//const reader = port.readable.getReader();
+
+	const textDecoder = new TextDecoderStream();
+	const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+	const reader = textDecoder.readable.getReader();
+
+	// Listen to data coming from the serial device.
+	while (true) {
+	const { value, done } = await reader.read();
+	if (done) {
+		// Allow the serial port to be closed later.
+		reader.releaseLock();
+		break;
+	}
+	// value is a Uint8Array.
+	console.log(value);
+	}
 });
 </script>
 
