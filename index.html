@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 
+<button>Serial Port Select</button>
 
-<button>Request Serial Port</button>
 <script>
-  const button = document.querySelector('button');
-  button.addEventListener('click', async function() {
+const button = document.querySelector('button');
+button.addEventListener('click', async function() {
 
-    // Prompt user to select any serial port.
-    const port = await navigator.serial.requestPort();
+	// Prompt user to select any serial port.
+	const port = await navigator.serial.requestPort();
 
-    // Wait for the serial port to open.
-    await port.open({ baudRate: 9600 });
-  });
+	// Wait for the serial port to open.
+	await port.open({ baudRate: 9600 });
+
+	button.style.display = 'none'
+});
 </script>
+
+
+
 
 
 <html lang="en">
@@ -29,6 +34,12 @@
 				z-index: 100;
 				display:block;
 				color:red;
+			}
+
+			button {
+				position: absolute;
+				z-index: 110;
+				/* display: block; */
 			}
 			.progress-bar-container {
 				position: absolute;
