@@ -10,6 +10,19 @@ const robotGuiStore = storeManager.createStore('RobotGui', {})
 
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
+
+
+
+
+/*
+if ("serial" in navigator) {
+  // The Web Serial API is supported.
+ 
+    const port = await navigator.serial.requestPort();
+} */
+
+
+
 /* DAT GUI */
 
 // const geometryGui = gui.addFolder('robot geometry')
