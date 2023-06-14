@@ -47,7 +47,7 @@ button.addEventListener('click', async function() {
 	// Listen to data coming from the serial device.
 	while (true) {
         let done
-		({ value, done }) = await reader.read();
+		value, done = await reader.read();
 		//const value = await reader.read();
 		
 		if (done) {
