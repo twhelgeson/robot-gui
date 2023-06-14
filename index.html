@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 
 
-<button>Request Serial Port</button>
-<script>
-  const button = document.querySelector('button');
-  button.addEventListener('click', async function() {
-
-    // Prompt user to select any serial port.
-    const port = await navigator.serial.requestPort();
-
-    // Wait for the serial port to open.
-    await port.open({ baudRate: 9600 });
-  });
-</script>
-
 
 <html lang="en">
 	<head>
@@ -74,7 +61,9 @@
 		<script type="module" src="/js/RobotJointControl.js"></script>
 		<script type="module" src="/js/RobotEEControl.js"></script>
 		<script type="module" src="/js/animate.js"></script>
-		<audio src="/lol.mp3" autoplay loop></audio>
+		<!-- <audio src="/lol.mp3" autoplay loop></audio> -->
+		<script type="module" src="/js/serialRead.js"></script>
+		<!-- <audio src="/lol.mp3" autoplay loop></audio> -->
 		<!-- <script type="module" src="/js/IKtest.js"></script> -->
 		<!-- <script type="module" src="/main.js"></script> -->
 	</body>
