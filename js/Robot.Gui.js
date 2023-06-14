@@ -156,6 +156,7 @@ window.addEventListener("keydown", (e) => {
   if(keys["p"]) { anglesDeg.A5 += rotStep }
   if(keys[";"]) { anglesDeg.A5 -= rotStep }
 
+
   // for(let key in anglesDeg) {
   //   if(anglesDeg[key] > 180) {
   //     anglesDeg[key] -= 360;

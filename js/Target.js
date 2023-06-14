@@ -5,6 +5,7 @@ import { renderer } from './scene'
 import { camera } from './scene'
 import * as THREE from 'three'
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+//import {potentValue} from 'ROBOT-GUI/index';
 
 /**
  * + state per module
@@ -288,6 +289,9 @@ let keys = {
   "4": false,
   "5": false,
   "6": false,
+
+  //this is a test
+  "m": false,
 }
 
 const transStep = 0.25;
@@ -312,6 +316,11 @@ window.addEventListener("keydown", (e) => {
   if(keys["4"]) { robRotation.y -= rotStep }
   if(keys["5"]) { robRotation.z += rotStep }
   if(keys["6"]) { robRotation.z -= rotStep }
+
+
+  if(keys["m"]) { /*robPosition.y = potentValue/500 */ //This does not work yet :(
+                  robPosition.y += transStep}
+
   if(e.key in keys) { setRobotTarget(robPosition, robRotation) }
   checkWin();
 })
