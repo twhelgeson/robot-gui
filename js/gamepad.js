@@ -64,8 +64,8 @@ for(let control in endEffectorControlMapping) {
 const endEffectorControlFolder2 = gui.addFolder("End Effector Control Option 2")
 var rotaryEncoders = {}
 rotaryEncoders["select device"] = "select device"
-for(let i = 0; i < 4; i++) {
-    rotaryEncoders["Rotary Encoder " + i] = new RotaryEncoder(0, i*2 + 1, i*2 + 2, i)
+for(let i = 0; i < 3; i++) {
+    rotaryEncoders["Rotary Encoder " + i] = new RotaryEncoder(0, i*3 + 1, i*3 + 2, i)
 }
 
 endEffectorControlFolder.close()
