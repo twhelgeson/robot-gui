@@ -78,7 +78,7 @@ const endEffectorControlMapping2 = {
     "x position": {device: rotaryEncoders["Rotary Encoder 0"]},
     "y position": {device: rotaryEncoders["Rotary Encoder 1"]},
     "z position": {device: rotaryEncoders["Rotary Encoder 2"]},
-    "x rotation": {device: rotaryEncoders["Rotary Encoder 3"]},
+    "x rotation": {device: "select device"},
     "y rotation": {device: "select device"},
     "z rotation": {device: "select device"},
 }
