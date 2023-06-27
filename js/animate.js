@@ -20,7 +20,7 @@ targetBox.hideBorder()
 
 const position1 = new THREE.Vector3(3, 3, 3)
 const rotation1 = new THREE.Vector3(0, 0, (Math.PI) / 2)
-const goalBox = new TargetBox(position1, rotation1, scene, 2)
+const goalBox = new TargetBox(position1, rotation1, scene, {x: 2, y: 3, z: 2})
 goalBox.setBorderColor( TargetBox.colors.green )
 goalBox.hideMesh()
 // goalBox.setBoundColor(TargetBox.colors.green)
@@ -28,7 +28,6 @@ goalBox.hideMesh()
 
 const progressBarContainer = document.querySelector('.progress-bar-container')
 manager.onLoad = function ( ) {
-	progressBarContainer.style.display = 'none'
     animate()
 };
 
@@ -46,16 +45,12 @@ const bounds = {
     z: { min: -4, max: 4}
 }
 
-export function animate() {
-    updateTarget()
+let counter = 0
 
-    targetCylinder.material.color.setHex(0xff0000)
-    if(robotIntersecting(targetBB)) {
-        targetCylinder.material.color.setHex(0x0000ff)
-    }
-    if(robotEEIntersecting(targetBB)) {
-        targetCylinder.material.color.setHex(0xffff00)
-    }
+export function animate() {
+    // wait for objects to fully load
+    if(counter < 2) counter++
+    if(counter === 2) progressBarContainer.style.display = 'none'
 
     targetBox.setColor( TargetBox.colors.blue )
     const inGoal = goalBox.boundingBox.containsBox(targetBox.boundingBox)

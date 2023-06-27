@@ -48,7 +48,7 @@ const defaultRobotState = {
     J4: [-120 / 180 * Math.PI, 120 / 180 * Math.PI],
     J5: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
   },
-  configuration: [false, false, false],
+  configuration: [false, true, false],
   geometry: {
     V0: {
       x: geo[0][0],

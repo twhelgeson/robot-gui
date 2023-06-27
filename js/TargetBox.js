@@ -10,12 +10,12 @@ export class TargetBox {
         yellow: 0xffff00
     }
 
-    constructor( position, rotation, scene, scale = 1, color = TargetBox.colors.blue ) {
+    constructor( position, rotation, scene, scale = {x: 1, y: 1, z: 1}, color = TargetBox.colors.blue ) {
         this.position = position
         this.rotation = rotation
 
         // Create box
-        this.geometry = new THREE.BoxGeometry( scale, scale, scale )
+        this.geometry = new THREE.BoxGeometry( scale.x, scale.y, scale.z )
         this.material = new THREE.MeshBasicMaterial( { color: color} )
         this.mesh = new THREE.Mesh( this.geometry, this.material )
         scene.add( this.mesh )
@@ -25,11 +25,8 @@ export class TargetBox {
         this.boundingBoxHelper = new THREE.Box3Helper( this.boundingBox, 0xffff00 )
         scene.add( this.boundingBoxHelper )
 
-
-
-
+        // Add border
         const points = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
-        // const points = [ new THREE.Vector3(0, 0, 0), new THREE.Vector3(1, 1, 1) ]
         const geometry = new MeshLineGeometry()
         geometry.setPoints(points)
         const resolution = new THREE.Vector2( window.innerWidth, window.innerHeight )
@@ -43,9 +40,6 @@ export class TargetBox {
         })
         this.border = new MeshLine(geometry, material)
         scene.add( this.border )
-
-
-
 
         // Position in scene
         this.setPosition(this.position)
@@ -71,7 +65,7 @@ export class TargetBox {
     setRotation( rotation ) {
         this.rotaton = rotation
         this.mesh.rotation.set( rotation.x, rotation.y, rotation.z )
-        this.rotation.set( rotation.x, rotation.y, rotation.z )
+        this.border.rotation.set( rotation.x, rotation.y, rotation.z )
         this.updateBoundingBox()
     }
 

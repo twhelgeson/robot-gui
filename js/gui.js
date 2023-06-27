@@ -3,7 +3,9 @@ import mapping from "../config/mapping.json" assert { type: "json" }
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 // Make a deep copy of the control config so we can reset controls later
-export var controls = JSON.parse(JSON.stringify(initialControls));
+var allControlLayers = JSON.parse(JSON.stringify(initialControls));
+export var controls = JSON.parse(JSON.stringify(allControlLayers[ "Controls Layer 1" ]))
+let CURRENT_LAYER = 1
 
 /* CREATE GUI */
 const gui = new GUI({width: 400})
@@ -20,6 +22,10 @@ let controlControls = {
 gui.add(controlControls, "Download Controls Config")
 gui.add(controlControls, "Upload Controls Config")
 gui.add(controlControls, "Reset Controls")
+
+gui.onChange( function () {
+    updateControls(allControlLayers[ "Controls Layer " + CURRENT_LAYER ], controls)
+})
 
 
 
@@ -138,7 +144,7 @@ function addControlsToGUI( guiFolder, controls, deviceNames ) {
 // Download the given json object
 function downloadControlsConfig() {
     const filename = "controls.json"
-    const jsonStr = JSON.stringify(controls)
+    const jsonStr = JSON.stringify(allControlLayers)
 
     let element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr))
@@ -170,7 +176,7 @@ function uploadControlsConfig() {
     reader.onload = readerEvent => {
         var content = readerEvent.target.result; // this is the content!
         const newControls = JSON.parse(content)
-        updateControls( controls, newControls )
+        updateControls( allControlLayers, newControls )
         updateGUI()
     }
 
@@ -180,7 +186,7 @@ function uploadControlsConfig() {
 }
 
 function resetControls() {
-    updateControls( controls, initialControls )
+    updateControls( allControlLayers, initialControls )
     updateGUI()
 }
 
@@ -205,4 +211,10 @@ function updateControls(oldControls, newControls) {
             oldControls[controlName] = newControls[controlName]
         }
     }
+}
+
+export function setLayer( layer ) {
+    CURRENT_LAYER = layer
+    updateControls( controls, allControlLayers[ "Controls Layer " + layer ] )
+    updateGUI()
 }

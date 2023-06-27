@@ -4,7 +4,7 @@ import { RotaryEncoder } from "./devices";
 import { Button } from "./devices";
 import { Axis } from "./devices"
 import { RobotController } from "./RobotController";
-import { controls } from "./gui";
+import { controls, setLayer } from "./gui";
 
 import mapping from "../config/mapping.json" assert { type: "json" }
 import { storeManager } from "./State";
@@ -31,6 +31,7 @@ window.addEventListener("gamepadconnected", (e) => {
     console.log(devices)
 });
 
+let prevSwitchState
 
 // update all controls
 export default function updateControls() {
@@ -43,6 +44,22 @@ export default function updateControls() {
     handleIncrementalControls("Joint")
     handleAxisControls("End Effector")
     handleAxisControls("Joint")
+
+    const switchSwitched = devices[ "Switches" ][ "Switch 0" ].pressed
+
+    if(switchSwitched) {
+        if( prevSwitchState === false || prevSwitchState === undefined) {
+            console.log( "Layer 1" )
+            setLayer( 1 )
+        }
+    } else {
+        if( prevSwitchState === true || prevSwitchState === undefined) {
+            console.log( "Layer 2" )
+            setLayer( 2 )
+        }
+    }
+
+    prevSwitchState = switchSwitched
 }
 
 
@@ -159,7 +176,6 @@ function setAxisPotentiometer( controlType, ID, potentiometer ) {
         robotController.setPosition( ID, position )
     } else if (controlType === "end effector rotation") {
         const rotation = propInputToEEOutput ( "rotation", ID, input )
-        console.log(rotation)
         robotController.setRotation( ID, rotation )
     }
 }
