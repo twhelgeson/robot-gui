@@ -4,7 +4,7 @@ import { RotaryEncoder } from "./devices";
 import { Button } from "./devices";
 import { Axis } from "./devices"
 import { RobotController } from "./RobotController";
-import { controls, setCurrentLayer } from "./gui";
+import { controls, currentControls, setCurrentLayer, toggleLayer } from "./gui";
 
 import mapping from "../config/mapping.json" assert { type: "json" }
 import { storeManager } from "./State";
@@ -31,8 +31,6 @@ window.addEventListener("gamepadconnected", (e) => {
     console.log(devices)
 });
 
-let prevSwitchState
-
 // update all controls
 export default function updateControls() {
     const gamepad = getGamepad()
@@ -44,23 +42,22 @@ export default function updateControls() {
     handleIncrementalControls("Joint")
     handleAxisControls("End Effector")
     handleAxisControls("Joint")
-
-    const switchSwitched = devices[ "Switches" ][ "Switch 0" ].pressed
-
-    if(switchSwitched) {
-        if( prevSwitchState === false || prevSwitchState === undefined) {
-            setCurrentLayer( 1 )
-        }
-    } else {
-        if( prevSwitchState === true || prevSwitchState === undefined) {
-            setCurrentLayer( 2 )
-        }
-    }
-
-    prevSwitchState = switchSwitched
+    handleLayerControl()
 }
 
-
+// Defines limits for end effector, used by linear potentiometers
+const eeLimits = {
+    position: {
+        x: [-7.5, 7.5],
+        y: [2.75, 10],
+        z: [-7.5, 7.5]
+    },
+    rotation: {
+        x: [ -(Math.PI), Math.PI ],
+        y: [ -(Math.PI), Math.PI ],
+        z: [ -(Math.PI), Math.PI ]
+    }
+}
 
 /* CREATE DEVICES */
 
@@ -105,6 +102,45 @@ function makeBasicDevices( deviceMappings, DeviceClass ) {
     return devices
 }
 
+/* HANDLE LAYER CONTROL */
+function handleLayerControl() {
+    const controlName = controls["Layer Toggle"]
+    if( controlName === "none" ) return
+
+    const device = getButton( controlName )
+    
+    if(controlName.includes("Switch")) {
+        handleLayerSwitch( device )
+    } else {
+        handleLayerButton( device )
+    }
+}
+
+let prevButtonState
+function handleLayerButton( device ) {
+    if(device.pressed) {
+        if(prevButtonState === false || prevButtonState === undefined) {
+            toggleLayer()
+        }
+    }
+    prevButtonState = device.pressed
+}
+
+let prevSwitchState
+function handleLayerSwitch( device ) {
+    const switchSwitched = device.pressed
+    if(switchSwitched) {
+        if( prevSwitchState === false || prevSwitchState === undefined) {
+            setCurrentLayer( 1 )
+        }
+    } else {
+        if( prevSwitchState === true || prevSwitchState === undefined) {
+            setCurrentLayer( 2 )
+        }
+    }
+    prevSwitchState = switchSwitched
+}
+
 
 /* HANDLE AXIS CONTROLS */
 
@@ -112,7 +148,7 @@ function handleAxisControls( mode ) {
     var controlTerm
     if(mode === "End Effector") controlTerm = "Axis"
     else controlTerm = "Angle"
-    const axisControls = controls[ mode + " Controls"][controlTerm + " Controls"]
+    const axisControls = currentControls[ mode + " Controls"][controlTerm + " Controls"]
     for(let controlName in axisControls) {
         const axisName = axisControls[controlName]
         if(typeof(axisName) !== "string") continue
@@ -150,6 +186,7 @@ function handleAxisControl( controlType, controlName, axisName ) {
 
 }
 
+// Controls an axis using a rotary encoder
 function setAxisRotaryEncoder( controlType, ID, encoder ) {
     const velocity = encoder.velocity
     const direction = encoder.direction
@@ -178,19 +215,8 @@ function setAxisPotentiometer( controlType, ID, potentiometer ) {
     }
 }
 
-const eeLimits = {
-    position: {
-        x: [-7.5, 7.5],
-        y: [2.75, 10],
-        z: [-7.5, 7.5]
-    },
-    rotation: {
-        x: [ -(Math.PI), Math.PI ],
-        y: [ -(Math.PI), Math.PI ],
-        z: [ -(Math.PI), Math.PI ]
-    }
-}
-
+// Returns properly scaled output for end effector based on arbitrary end
+// effector limits
 function propInputToEEOutput( mode, axis, input ) {
     const inputProp = mapInput( -1, 1, input)
     const limits = eeLimits[mode][axis]
@@ -199,6 +225,7 @@ function propInputToEEOutput( mode, axis, input ) {
     return mapOutput( min, max, inputProp)
 }
 
+// Returns properly scaled output for a joint based on joint limits
 function propInputToJointOutput( jointNumber, input ) {
     const inputProp = mapInput( -1, 1, input)
     const jointLimits = storeManager.getStore("Robot").getState().jointLimits
@@ -239,7 +266,7 @@ function incrementAmt ( controlType, ID, amt ) {
 /* HANDLE CONTROLS INCREMENTAL */
 
 function handleIncrementalControls( mode ) {
-    const incrementalControls = controls[ mode + " Controls"]["Incremental Controls"]
+    const incrementalControls = currentControls[ mode + " Controls"]["Incremental Controls"]
     for(let controlName in incrementalControls) {
         // handle step size control
         if(controlName.includes("step size")) {
@@ -362,6 +389,8 @@ function getButton( buttonName ) {
         buttonName = nameArray[3]
         
         return devices["Rotary Encoders"][encoderName].buttons[buttonName]
+    } else if ( buttonName.includes( "Switch" )) {
+        return devices["Switches"][buttonName]
     } else {
         return devices["Buttons"][buttonName]
     }
