@@ -4,13 +4,28 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 // Make a deep copy of the control config so we can reset controls later
 var allControlLayers = JSON.parse(JSON.stringify(initialControls));
+var editControls = JSON.parse(JSON.stringify(allControlLayers[ "Controls Layer 1" ]))
 export var controls = JSON.parse(JSON.stringify(allControlLayers[ "Controls Layer 1" ]))
-let CURRENT_LAYER = 1
+
+let layer = {
+    current: 1,
+    edit: 1
+}
+
+const layerInfo = document.getElementById("layer-info")
 
 /* CREATE GUI */
 const gui = new GUI({width: 400})
 gui.close()
-const guiFolders = addFolders( controls, gui)
+
+// Create dropdown for switching layers
+const layerDropdown = gui.add( layer, "edit", {"Layer 1": 1, "Layer 2": 2}).name("Edit Layer")
+layerDropdown.onChange(function () {
+    setEditLayer( layer.edit )
+    updateGUI()
+})
+
+const guiFolders = addFolders( editControls, gui)
 createControls()
 
 // META!! controls for the controls
@@ -23,8 +38,18 @@ gui.add(controlControls, "Download Controls Config")
 gui.add(controlControls, "Upload Controls Config")
 gui.add(controlControls, "Reset Controls")
 
-gui.onChange( function () {
-    updateControls(allControlLayers[ "Controls Layer " + CURRENT_LAYER ], controls)
+gui.onChange(event => {
+    const controllerName = event.controller._name
+
+    // Don't update layer when layer dropdown switched, otherwise one layer is copied to other
+    if(controllerName !== layerDropdown._name) {
+        updateControls(allControlLayers[ "Controls Layer " + layer.edit ], editControls)
+        
+        // if we are editing the current layer, update the controls
+        if(layer.current === layer.edit) {
+            updateControls(controls, allControlLayers[ "Controls Layer " + layer.current])
+        }
+    }
 })
 
 
@@ -45,14 +70,14 @@ function createIncrementalControls() {
     // Create end effector incremental controls
     addControlsToGUI( 
         guiFolders["End Effector Controls"]["Incremental Controls"].folder,
-        controls["End Effector Controls"]["Incremental Controls"],
+        editControls["End Effector Controls"]["Incremental Controls"],
         buttonList
     )
 
     // Create joint level incremental controls
     addControlsToGUI( 
         guiFolders["Joint Controls"]["Incremental Controls"].folder,
-        controls["Joint Controls"]["Incremental Controls"],
+        editControls["Joint Controls"]["Incremental Controls"],
         buttonList
     )
 }
@@ -65,14 +90,14 @@ function createAxisControls() {
     // End effector axis controls
     addControlsToGUI(
         guiFolders["End Effector Controls"]["Axis Controls"].folder,
-        controls["End Effector Controls"]["Axis Controls"],
+        editControls["End Effector Controls"]["Axis Controls"],
         axisList
     )
 
     // Joint axis controls
     addControlsToGUI(
         guiFolders["Joint Controls"]["Angle Controls"].folder,
-        controls["Joint Controls"]["Angle Controls"],
+        editControls["Joint Controls"]["Angle Controls"],
         axisList
     )
 }
@@ -177,6 +202,7 @@ function uploadControlsConfig() {
         var content = readerEvent.target.result; // this is the content!
         const newControls = JSON.parse(content)
         updateControls( allControlLayers, newControls )
+        updateActiveLayers()
         updateGUI()
     }
 
@@ -187,6 +213,7 @@ function uploadControlsConfig() {
 
 function resetControls() {
     updateControls( allControlLayers, initialControls )
+    updateActiveLayers()
     updateGUI()
 }
 
@@ -213,8 +240,21 @@ function updateControls(oldControls, newControls) {
     }
 }
 
-export function setLayer( layer ) {
-    CURRENT_LAYER = layer
-    updateControls( controls, allControlLayers[ "Controls Layer " + layer ] )
+function updateActiveLayers() {
+    updateControls( editControls, allControlLayers[ "Controls Layer " + layer.edit ])
+    updateControls( controls, allControlLayers[ "Controls Layer " + layer.current ])
+}
+
+function setEditLayer( layerNum ) {
+    console.log("Editing Layer " + layerNum)
+    layer.edit = layerNum
+    updateControls( editControls, allControlLayers[ "Controls Layer " + layerNum ])
     updateGUI()
+}
+
+export function setCurrentLayer( layerNum ) {
+    console.log("Using Layer " + layerNum)
+    layer.current = layerNum
+    layerInfo.innerHTML = "Layer " + layerNum
+    updateControls( controls, allControlLayers[ "Controls Layer " + layerNum ] )
 }

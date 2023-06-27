@@ -4,7 +4,7 @@ import { RotaryEncoder } from "./devices";
 import { Button } from "./devices";
 import { Axis } from "./devices"
 import { RobotController } from "./RobotController";
-import { controls, setLayer } from "./gui";
+import { controls, setCurrentLayer } from "./gui";
 
 import mapping from "../config/mapping.json" assert { type: "json" }
 import { storeManager } from "./State";
@@ -49,13 +49,11 @@ export default function updateControls() {
 
     if(switchSwitched) {
         if( prevSwitchState === false || prevSwitchState === undefined) {
-            console.log( "Layer 1" )
-            setLayer( 1 )
+            setCurrentLayer( 1 )
         }
     } else {
         if( prevSwitchState === true || prevSwitchState === undefined) {
-            console.log( "Layer 2" )
-            setLayer( 2 )
+            setCurrentLayer( 2 )
         }
     }
 

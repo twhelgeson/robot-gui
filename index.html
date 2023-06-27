@@ -5,14 +5,15 @@
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
-			#info {
+			#layer-info {
 				position: absolute;
-				top: 10px;
-				width: 100%;
+				top: 96vh;
+				left: 1vh;
 				text-align: center;
 				z-index: 100;
 				display:block;
-				color:red;
+				color:black;
+				background:white;
 			}
 			.progress-bar-container {
 				position: absolute;
@@ -44,6 +45,7 @@
 		<label for="progress-bar" id="progress-bar-label">Loading...</label>
 		<progress id="progress-bar" value="0" max="100"> </progress>
 	</div>
+	<div id="layer-info">Layer 1</div>
 	<body>
 		<script type="module" src="/js/scene.js"></script>
 		<script type="module" src="/js/camera.js"></script>
