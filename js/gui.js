@@ -32,8 +32,8 @@ let controlControls = {
     "Upload Controls Config": uploadControlsConfig,
     "Reset Controls": resetControls,
     "Reset Layer": resetEditLayer,
-    "Duplicate Layer 1": () => duplicateLayer(1),
-    "Duplicate Layer 2": () => duplicateLayer(2)
+    "Copy Controls From Layer 1": () => duplicateLayer(1),
+    "Copy Controls From Layer 2": () => duplicateLayer(2)
 }
 
 // Create layer toggle control
@@ -43,8 +43,8 @@ layerControlFolder.add(controls, "Layer Toggle", binaryControlList)
 layerControlFolder.add(controlControls, "Reset Layer")
 
 // Button for duplicating layers
-const duplicateLayerOne = layerControlFolder.add( controlControls, "Duplicate Layer 1")
-const duplicateLayerTwo = layerControlFolder.add( controlControls, "Duplicate Layer 2")
+const duplicateLayerOne = layerControlFolder.add( controlControls, "Copy Controls From Layer 1")
+const duplicateLayerTwo = layerControlFolder.add( controlControls, "Copy Controls From Layer 2")
 duplicateLayerOne.hide()
 
 // Create folders for robot controls
