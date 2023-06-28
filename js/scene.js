@@ -28,9 +28,17 @@ const rgbeLoader = new RGBELoader( manager )
 // display loading progress
 const progressBar = document.getElementById('progress-bar');
 const progressLabel = document.getElementById('progress-bar-label');
+
+var loadingText = 'Loading...'
 manager.onProgress = function ( url, itemsLoaded, itemsTotal) {
-	progressBar.value = (itemsLoaded / itemsTotal) * 100
-    progressLabel.innerHTML = 'Loaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.'
+	console.log(itemsTotal)
+	const actualTotal = 34
+	progressBar.value = (itemsLoaded / actualTotal) * 100
+	// var text = 'Loaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.'
+	if(url.includes('robot_arm')) loadingText = 'Designing robot arm...'
+	if(url.includes('ISS.json')) loadingText = 'Sending space station into orbit...'
+	if(url.includes('HDRI_Orbital')) loadingText = 'Generating Earth...'
+    progressLabel.innerHTML = loadingText
 }
 
 manager.onError = function ( url ) {

@@ -14,12 +14,12 @@ import { targetBB } from "./Target";
 
 
 const position = new THREE.Vector3(1, 2, 3)
-const rotation = new THREE.Vector3(0, 0, (Math.PI) / 2)
+const rotation = new THREE.Vector3(0, 0, 0)
 const targetBox = new TargetBox(position, rotation, scene)
 targetBox.hideBorder()
 
 const position1 = new THREE.Vector3(3, 3, 3)
-const rotation1 = new THREE.Vector3(0, 0, (Math.PI) / 2)
+const rotation1 = new THREE.Vector3(0, 0, 0)
 const goalBox = new TargetBox(position1, rotation1, scene, {x: 2, y: 3, z: 2})
 goalBox.setBorderColor( TargetBox.colors.green )
 goalBox.hideMesh()

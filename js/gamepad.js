@@ -49,7 +49,7 @@ export default function updateControls() {
 const eeLimits = {
     position: {
         x: [-7.5, 7.5],
-        y: [2.75, 10],
+        y: [0, 10],
         z: [-7.5, 7.5]
     },
     rotation: {
