@@ -1,3 +1,8 @@
+import * as TWEEN from '@tweenjs/tween.js'
+
+// units per second
+const MAX_VEL = 1
+
 export class RobotController {
     static DEG_TO_RAD = Math.PI / 180
     constructor(robotStore, transStep = 0.25, rotStep = (Math.PI)/36) {
@@ -12,6 +17,14 @@ export class RobotController {
         // How much to move by
         this.rotStep = rotStep
         this.transStep = transStep
+
+        this.tween = new TWEEN.Tween(this.EEposition)
+            .to({x: 0, y: 5, z: 0}, 500)
+            .dynamic(true)
+            .easing(TWEEN.Easing.Linear.None)
+            .onUpdate((tweenPosition) =>
+                this.#setRobotTarget(tweenPosition, this.EErotation)
+            )
     }
 
     setTransStep( step ) {
@@ -28,13 +41,13 @@ export class RobotController {
     }
 
     setPosition( axis, position ) {
-        const newPosition = setDictVal( this.EEposition, axis, position )
-        this.#setRobotTarget( newPosition, this.EErotation )
+        this.EEposition[ axis ] = position
+        this.#setTweenTarget( this.EEposition, this.EErotation )
     }
 
     setRotation( axis, rotation ) {
-        const newRotation = setDictVal( this.EErotation, axis, rotation )
-        this.#setRobotTarget( this.EEposition, newRotation )
+        this.EErotation[ axis ] = rotation
+        this.#setTweenTarget( this.EEposition, this.EErotation )
     }
 
     incrementJoint( jointNumber ) { this.moveJoint( jointNumber, 1 ) }
@@ -67,18 +80,24 @@ export class RobotController {
 
     moveAlongAxisAmt( axis, amt ) {
         const position = incrementDictVal(this.EEposition, axis, amt)
-        this.#setRobotTarget( position, this.EErotation )
+        this.#setTweenTarget( position, this.EErotation )
     }
 
     rotateAroundAxisAmt( axis, amt ) {
         const rotation = incrementDictVal(this.EErotation, axis, amt)
-        this.#setRobotTarget( this.EEposition, rotation )
+        this.#setTweenTarget( this.EEposition, rotation )
     }
 
     #updateState() {
         this.angles = this.robotStore.getState().angles
         this.EEposition = this.robotStore.getState().target.position
         this.EErotation = this.robotStore.getState().target.rotation
+    }
+
+    #setTweenTarget(position) {
+        this.tween.stop()
+        this.tween.to(position, 10)
+        this.tween.startFromCurrentValues()
     }
 
     #setRobotTarget( position, rotation ) {
@@ -105,4 +124,13 @@ function setDictVal( dict, key, val ) {
     Object.assign( dictCopy, dict )
     dictCopy[ key ] = val
     return dictCopy
+}
+
+function distance( point1, point2 ) {
+    const dx = point2.x - point1.x
+    const dy = point2.y - point1.y
+    const dz = point2.z - point1.z
+    const sum = Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2)
+
+    return Math.sqrt(sum)
 }

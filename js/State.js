@@ -136,7 +136,6 @@ class Store {
   }
 
   getStore(storeName) {
-    // console.log(`%cStore [${this.name}] requesting data from [${storeName}]`, 'font-weight:bold')
     return this.storeManager.getStore(storeName)
   }
 }

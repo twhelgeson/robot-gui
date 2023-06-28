@@ -296,7 +296,6 @@ function duplicateLayer( num ) {
 }
 
 function setEditLayer( layerNum ) {
-    console.log("Editing Layer " + layerNum)
     layer.edit = layerNum
     updateControls( editControls, controls[ "Controls Layer " + layerNum ])
     updateGUI()
@@ -311,7 +310,6 @@ function setEditLayer( layerNum ) {
 }
 
 export function setCurrentLayer( layerNum ) {
-    console.log("Using Layer " + layerNum)
     layer.current = layerNum
     layerInfo.innerHTML = "Layer " + layerNum
     updateControls( currentControls, controls[ "Controls Layer " + layerNum ] )

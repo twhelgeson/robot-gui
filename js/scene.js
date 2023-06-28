@@ -31,7 +31,6 @@ const progressLabel = document.getElementById('progress-bar-label');
 
 var loadingText = 'Loading...'
 manager.onProgress = function ( url, itemsLoaded, itemsTotal) {
-	console.log(itemsTotal)
 	const actualTotal = 34
 	progressBar.value = (itemsLoaded / actualTotal) * 100
 	// var text = 'Loaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.'
@@ -51,7 +50,7 @@ const axesHelper = new THREE.AxesHelper( 5 );
 // scene.add( axesHelper );
 
 // load background and space station
-loadEnv()
+// loadEnv()
 
 /* HELPER FUNCTIONS */
 

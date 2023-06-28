@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import * as TWEEN from '@tweenjs/tween.js'
+
 import { scene } from './scene';
 import { storeManager } from './State';
 import { manager } from "./scene";
@@ -7,6 +9,9 @@ import { robotEEIntersecting, robotStore, updateRobot } from "./RobotTHREE";
 import updateControls, { grasping } from "./gamepad";
 import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
+
+import { targetBB } from "./Target";
+import { robotController } from './RobotEEControl';
 
 
 let targets = []
@@ -64,8 +69,12 @@ const bounds = {
 let counter = 0
 
 export function animate() {
+    // wait for objects to fully load
     if(counter < 3) counter++
-    if(counter === 2) progressBarContainer.style.display = "none"
+    if(counter === 2) {
+        progressBarContainer.style.display = 'none'
+        robotController.tween.start()
+    }
 
     for(const target of targets) {
         // arm end effector is touching attachment point
@@ -110,6 +119,7 @@ export function animate() {
     updateRobot()
     updateControls()
     updateCamera()
+    TWEEN.update()
 
     setTimeout( function() {
 

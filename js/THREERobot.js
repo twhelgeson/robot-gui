@@ -119,7 +119,6 @@ export default class THREERobot {
       x = link[0]
       y = link[1]
       z = link[2]
-      // console.log(link[0], link[1], link[2])
       parentObject.add(linkGeo)
       parentObject = linkGeo
       this.robotBones.push(linkGeo)
@@ -142,8 +141,7 @@ export default class THREERobot {
       cube.position.copy(mesh.userData.obb.center)
       cube.setRotationFromMatrix(rotation4)
       this.bbHelpers.push(cube)
-      // console.log(cube)
-      // scene.add(cube)
+      scene.add(cube)
     }
 
   }

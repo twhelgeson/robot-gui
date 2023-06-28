@@ -28,7 +28,6 @@ window.addEventListener("gamepadconnected", (e) => {
 
     GAMEPAD_INDEX = gp.index
     makeDevices()
-    console.log(devices)
 });
 
 export var grasping = false

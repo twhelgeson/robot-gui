@@ -84,8 +84,6 @@ store.action('TARGET_CHANGE_TARGET', (state, data) => {
   // const pos = { ...state.rotation,
   //   ...data.rotation,
   // }
-  //
-  // console.log(pos)
   if (state.followTarget) {
     store.getStore('Robot').dispatch('ROBOT_CHANGE_TARGET', {
       position: { ...state.position, // allow for changing only one parameter (x,y,z)

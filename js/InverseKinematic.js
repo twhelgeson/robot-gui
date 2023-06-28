@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 const Serial = {
-  println(text) {
-    // // console.log(text)
+    println(text) {
   },
 }
 
