@@ -10,27 +10,35 @@ export class TargetBox {
         yellow: 0xffff00
     }
 
-    constructor( position, rotation, scene, scale = {x: 1, y: 1, z: 1}, color = TargetBox.colors.blue ) {
+    constructor( position, rotation, scene, 
+                 scale = {x: 1, y: 1, z: 1}, 
+                 color = TargetBox.colors.blue ) 
+    {
+
         this.position = position
         this.rotation = rotation
+
+        // Group to hold each part of the box
+        this.box = new THREE.Group()
 
         // Create box
         this.geometry = new THREE.BoxGeometry( scale.x, scale.y, scale.z )
         this.material = new THREE.MeshBasicMaterial( { color: color} )
         this.mesh = new THREE.Mesh( this.geometry, this.material )
-        scene.add( this.mesh )
+        this.mesh.geometry.translate( 0, 0, -(scale.z/2))
+        this.box.add(this.mesh)
 
         // Create bounding box
         this.boundingBox = new THREE.Box3().setFromObject( this.mesh )
         this.boundingBoxHelper = new THREE.Box3Helper( this.boundingBox, 0xffff00 )
-        scene.add( this.boundingBoxHelper )
+        // scene.add( this.boundingBoxHelper )
 
         // Add border
-        const points = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
-        const geometry = new MeshLineGeometry()
-        geometry.setPoints(points)
+        const corners = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
+        const borderGeometry = new MeshLineGeometry()
+        borderGeometry.setPoints(corners)
         const resolution = new THREE.Vector2( window.innerWidth, window.innerHeight )
-        const material = new MeshLineMaterial({		
+        const borderMaterial = new MeshLineMaterial({		
             useMap: false,
             color: new THREE.Color("white"),
             opacity: 1,
@@ -38,12 +46,29 @@ export class TargetBox {
             sizeAttenuation: false,
             lineWidth: 10,
         })
-        this.border = new MeshLine(geometry, material)
-        scene.add( this.border )
+        this.border = new MeshLine(borderGeometry, borderMaterial)
+        this.box.add(this.border)
+
+        // Add attachment point
+        const attachmentGeometry = new THREE.SphereGeometry(0.3, 32, 16)
+        const attachmentMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } )
+        this.attachmentPoint = new THREE.Mesh( attachmentGeometry, attachmentMaterial ); 
+        this.box.add( this.attachmentPoint )
+
+        // Create bound for attachment point
+        this.attachmentPoint.geometry.computeBoundingSphere()
+        this.attachmentPointBound = new THREE.Sphere().copy(
+            this.attachmentPoint.geometry.boundingSphere
+        )
+
+        // Add whole group to scene
+        scene.add(this.box)
 
         // Position in scene
         this.setPosition(this.position)
         this.setRotation(this.rotation)
+
+        console.log(this.attachmentPointBound)
 
     }
 
@@ -55,22 +80,24 @@ export class TargetBox {
         this.border.material.color.setHex( color ) 
     }
 
-    setPosition( position ) {
+    transform( position, rotation ) {
         this.position = position
-        this.mesh.position.set( position.x, position.y, position.z )
-        this.border.position.set( position.x, position.y, position.z )
-        this.updateBoundingBox()
+        this.rotaton = rotation
+
+        this.box.position.set( position.x, position.y, position.z )
+        this.box.rotation.set( rotation.x, rotation.y, rotation.z )
+
+        this.boundingBox.setFromObject( this.box )
+        this.attachmentPointBound.copy( this.attachmentPoint.geometry.boundingSphere )
+            .applyMatrix4( this.attachmentPoint.matrixWorld )
+    }
+
+    setPosition( position ) {
+        this.transform( position, this.rotation )
     }
 
     setRotation( rotation ) {
-        this.rotaton = rotation
-        this.mesh.rotation.set( rotation.x, rotation.y, rotation.z )
-        this.border.rotation.set( rotation.x, rotation.y, rotation.z )
-        this.updateBoundingBox()
-    }
-
-    updateBoundingBox() {
-        this.boundingBox.setFromObject( this.mesh )
+        this.transform( this.position, rotation )
     }
 
     showMesh() {

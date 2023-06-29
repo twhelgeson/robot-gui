@@ -178,8 +178,8 @@ export default class THREERobot {
     for (let i = 0; i < this.robotBones.length; i++) {
       const mesh = this.robotBasicMeshes[i]
 
-      mesh.userData.obb.copy( mesh.geometry.userData.obb );
-			mesh.userData.obb.applyMatrix4( mesh.matrixWorld );
+      mesh.userData.obb.copy( mesh.geometry.userData.obb )
+			                  .applyMatrix4( mesh.matrixWorld )
 
       this.bbHelpers[i].position.copy(mesh.userData.obb.center)
 
@@ -197,9 +197,15 @@ export default class THREERobot {
     return inter
   }
 
-  intersectingEE(boundingBox) {
+  intersectingEE(bound) {
     const mesh = this.robotBasicMeshes[5]
-    return mesh.userData.obb.intersectsBox3(boundingBox)
+
+    if(bound.constructor.name === "Box3") {
+      return mesh.userData.obb.intersectsBox3(bound)
+    } else {
+      return mesh.userData.obb.intersectsSphere(bound)
+    }
+    
   }
 
   _colorObjectAndChildren(object, hexColor) {

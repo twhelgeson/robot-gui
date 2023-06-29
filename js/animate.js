@@ -18,7 +18,7 @@ const rotation = new THREE.Vector3(0, 0, 0)
 const targetBox = new TargetBox(position, rotation, scene)
 targetBox.hideBorder()
 
-const position1 = new THREE.Vector3(3, 3, 3)
+const position1 = new THREE.Vector3(3, 2, 1)
 const rotation1 = new THREE.Vector3(0, 0, 0)
 const goalBox = new TargetBox(position1, rotation1, scene, {x: 2, y: 3, z: 2})
 goalBox.setBorderColor( TargetBox.colors.green )
@@ -54,13 +54,15 @@ export function animate() {
 
     targetBox.setColor( TargetBox.colors.blue )
     const inGoal = goalBox.boundingBox.containsBox(targetBox.boundingBox)
-    if(robotEEIntersecting(targetBox.boundingBox) && attach) {
+    if(robotEEIntersecting(targetBox.attachmentPointBound)) {
         targetBox.setColor( TargetBox.colors.green )
 
         const target = storeManager.getStore("Robot").getState().target
 
         targetBox.setPosition( target.position )
         targetBox.setRotation( target.rotation )
+        
+        console.log(targetBox.attachmentPointBound)
     }
 
     goalBox.setBorderColor( TargetBox.colors.green )
