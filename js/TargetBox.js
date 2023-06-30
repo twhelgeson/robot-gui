@@ -15,9 +15,6 @@ export class TargetBox {
                  color = TargetBox.colors.blue ) 
     {
 
-        this.position = position
-        this.rotation = rotation
-
         // Group to hold each part of the box
         this.box = new THREE.Group()
 
@@ -65,10 +62,12 @@ export class TargetBox {
         scene.add(this.box)
 
         // Position in scene
-        this.setPosition(this.position)
-        this.setRotation(this.rotation)
+        this.setPosition(position)
+        this.setRotation(rotation)
 
         console.log(this.attachmentPointBound)
+
+        this.attachedRotation
 
     }
 
@@ -80,9 +79,26 @@ export class TargetBox {
         this.border.material.color.setHex( color ) 
     }
 
+    attach( position, rotation ) {
+        if(this.attachedRotation === undefined) this.attachedRotation = rotation
+
+        const diff = new THREE.Vector3().copy( this.attachedRotation )
+        diff.sub( rotation )
+
+        const newRotation = new THREE.Vector3(
+            this.box.rotation.x - diff.x,
+            this.box.rotation.y + diff.y,
+            this.box.rotation.z + diff.z
+        )
+
+        const euler = new THREE.Euler().setFromVector3( newRotation, "XYZ" )
+        this.box.rotation.copy(euler)
+        this.setPosition( position )
+
+        this.attachedRotation = rotation
+    }
+
     transform( position, rotation ) {
-        this.position = position
-        this.rotaton = rotation
 
         this.box.position.set( position.x, position.y, position.z )
         this.box.rotation.set( rotation.x, rotation.y, rotation.z )
@@ -93,11 +109,11 @@ export class TargetBox {
     }
 
     setPosition( position ) {
-        this.transform( position, this.rotation )
+        this.transform( position, this.box.rotation )
     }
 
     setRotation( rotation ) {
-        this.transform( this.position, rotation )
+        this.transform( this.box.position, rotation )
     }
 
     showMesh() {
@@ -114,6 +130,14 @@ export class TargetBox {
 
     hideBorder() {
         this.border.visible = false
+    }
+
+    showAttachmentPoint() {
+        this.attachmentPoint.visible = true
+    }
+
+    hideAttachmentPoint() {
+        this.attachmentPoint.visible = false
     }
 }
 

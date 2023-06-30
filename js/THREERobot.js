@@ -208,6 +208,16 @@ export default class THREERobot {
     
   }
 
+  getEERotation() {
+    const mesh = this.robotBasicMeshes[5]
+    const quaternion = new THREE.Quaternion()
+    mesh.getWorldQuaternion( quaternion )
+    const euler = new THREE.Euler().setFromQuaternion( quaternion )
+    
+
+    return euler
+  }
+
   _colorObjectAndChildren(object, hexColor) {
     const scope = this
     object.traverse((node) => {

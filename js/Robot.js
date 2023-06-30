@@ -48,7 +48,7 @@ const defaultRobotState = {
     J4: [-120 / 180 * Math.PI, 120 / 180 * Math.PI],
     J5: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
   },
-  configuration: [false, true, false],
+  configuration: [false, false, false],
   geometry: {
     V0: {
       x: geo[0][0],
@@ -140,7 +140,6 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
   }
 
   if(!invalid) {
-    console.log(data.position)
     return Object.assign({}, state, {
       target: {
         position: Object.assign({}, data.position),

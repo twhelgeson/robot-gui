@@ -4,7 +4,7 @@ import { updateTarget } from "./Target"
 import { storeManager } from './State';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
-import { robotEEIntersecting, updateRobotBounds } from "./RobotTHREE";
+import { getRobotEERotation, robotEEIntersecting, updateRobotBounds } from "./RobotTHREE";
 import { robotIntersecting } from "./RobotTHREE";
 import { targetCylinder } from "./Target";
 import updateControls from "./gamepad";
@@ -13,7 +13,7 @@ import { TargetBox } from "./targetBox";
 import { targetBB } from "./Target";
 
 
-const position = new THREE.Vector3(1, 2, 3)
+const position = new THREE.Vector3(4, 4, 0)
 const rotation = new THREE.Vector3(0, 0, 0)
 const targetBox = new TargetBox(position, rotation, scene)
 targetBox.hideBorder()
@@ -23,6 +23,7 @@ const rotation1 = new THREE.Vector3(0, 0, 0)
 const goalBox = new TargetBox(position1, rotation1, scene, {x: 2, y: 3, z: 2})
 goalBox.setBorderColor( TargetBox.colors.green )
 goalBox.hideMesh()
+goalBox.hideAttachmentPoint()
 // goalBox.setBoundColor(TargetBox.colors.green)
 
 
@@ -52,17 +53,18 @@ export function animate() {
     if(counter < 2) counter++
     if(counter === 2) progressBarContainer.style.display = 'none'
 
+    const state = storeManager.getStore("Robot").getState()
+
     targetBox.setColor( TargetBox.colors.blue )
     const inGoal = goalBox.boundingBox.containsBox(targetBox.boundingBox)
+
     if(robotEEIntersecting(targetBox.attachmentPointBound)) {
         targetBox.setColor( TargetBox.colors.green )
 
-        const target = storeManager.getStore("Robot").getState().target
+        const target = state.target
+        // targetBox.setPosition( target.position )
+        targetBox.attach( target.position, target.rotation )
 
-        targetBox.setPosition( target.position )
-        targetBox.setRotation( target.rotation )
-        
-        console.log(targetBox.attachmentPointBound)
     }
 
     goalBox.setBorderColor( TargetBox.colors.green )

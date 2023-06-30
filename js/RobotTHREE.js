@@ -63,4 +63,8 @@ export function robotEEIntersecting(boundingBox) {
   return VisualRobot.intersectingEE(boundingBox)
 }
 
+export function getRobotEERotation() {
+  return VisualRobot.getEERotation()
+}
+
 export { robotStore }
