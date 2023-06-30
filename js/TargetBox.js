@@ -77,7 +77,7 @@ export class TargetBox {
         this.setRotation(rotation)
 
         // Used to track the previous rotation when attached to arm
-        this.attachedRotation
+        this.previousRotation
     }
 
     setColor( color ) {
@@ -93,26 +93,14 @@ export class TargetBox {
     }
 
     attach( position, rotation ) {
-        if(this.attachedRotation === undefined) this.attachedRotation = rotation
-
-        const diff = new THREE.Vector3().copy( this.attachedRotation )
-        diff.sub( rotation )
-
-        const newRotation = new THREE.Vector3(
-            this.box.rotation.x - diff.x,
-            this.box.rotation.y + diff.y,
-            this.box.rotation.z + diff.z
-        )
-
-        const euler = new THREE.Euler().setFromVector3( newRotation, "XYZ" )
-        this.box.rotation.copy(euler)
-        this.setPosition( position )
-
-        this.attachedRotation = rotation
+        const newRotation = new THREE.Vector3().copy( rotation )
+        newRotation.y += Math.PI
+        newRotation.z *= -1
+        this.transform( position, newRotation )
     }
 
     detach() {
-        this.attachedRotation = undefined
+        this.previousRotation = undefined
     }
 
     transform( position, rotation ) {

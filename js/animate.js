@@ -114,9 +114,9 @@ function getRandomPosition( bounds ) {
 }
 
 function getRandomRotation() {
-    const x = Math.PI / 2
-    const y = Math.PI / 2
-    const z = 0
+    const x = getRandomArbitrary(-Math.PI, Math.PI)
+    const y = getRandomArbitrary(-Math.PI, Math.PI)
+    const z = getRandomArbitrary(-Math.PI, Math.PI)
 
     return { x: x, y: y, z: z }
 }
