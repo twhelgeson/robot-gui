@@ -25,11 +25,12 @@ export class TargetBox {
         this.mesh = new THREE.Mesh( this.geometry, this.material )
         this.mesh.geometry.translate( 0, 0, -(scale.z/2))
         this.box.add(this.mesh)
+        this.scene = scene
 
         // Create bounding box
         this.boundingBox = new THREE.Box3().setFromObject( this.mesh )
         this.boundingBoxHelper = new THREE.Box3Helper( this.boundingBox, 0xffff00 )
-        scene.add( this.boundingBoxHelper )
+        this.scene.add( this.boundingBoxHelper )
 
         // Add border
         const corners = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
@@ -60,7 +61,7 @@ export class TargetBox {
         )
 
         // Add whole group to scene
-        scene.add(this.box)
+        this.scene.add(this.box)
 
         // Make vector represent orientation of box
         this.orientation = new THREE.Vector3().copy( TargetBox.upVector )
@@ -70,7 +71,7 @@ export class TargetBox {
         const length = 1
 
         this.arrowHelper = new THREE.ArrowHelper( this.orientation, origin, length, TargetBox.colors.yellow )
-        scene.add( this.arrowHelper )
+        this.scene.add( this.arrowHelper )
         
         // Position in scene
         this.setPosition(position)
@@ -144,11 +145,14 @@ export class TargetBox {
     }
 
     showAttachmentPoint() {
-        this.attachmentPoint.visible = true
+        this.scene.add(this.attachmentPoint)
+        this.boundingBox.setFromObject( this.box )
+        
     }
 
     hideAttachmentPoint() {
-        this.attachmentPoint.visible = false
+        this.attachmentPoint.removeFromParent()
+        this.boundingBox.setFromObject( this.box )
     }
 }
 
