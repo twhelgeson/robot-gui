@@ -78,6 +78,9 @@ gui.onChange(event => {
 function createControls() {
     createIncrementalControls()
     createAxisControls()
+
+    //Add gripper controls
+    gui.add(editControls, "Grasp", getBinaryControlNames( mapping ))
 }
 
 // Create all the incremental controls

@@ -31,6 +31,8 @@ window.addEventListener("gamepadconnected", (e) => {
     console.log(devices)
 });
 
+export var grasping = false
+
 // update all controls
 export default function updateControls() {
     const gamepad = getGamepad()
@@ -43,6 +45,7 @@ export default function updateControls() {
     handleAxisControls("End Effector")
     handleAxisControls("Joint")
     handleLayerControl()
+    handleGrasperControl()
 }
 
 // Defines limits for end effector, used by linear potentiometers
@@ -102,6 +105,37 @@ function makeBasicDevices( deviceMappings, DeviceClass ) {
     return devices
 }
 
+/* HANDLE GRASPER CONTROL */
+
+function handleGrasperControl() {
+    const controlName = currentControls["Grasp"]
+    if( controlName === "none" ) return
+
+    const device = getButton( controlName )
+    
+    if(controlName.includes("Switch")) {
+        handleGraspSwitch( device )
+    } else {
+        handleGraspButton( device )
+    }
+}
+
+function handleGraspSwitch( device ) {
+    grasping = device.pressed
+}
+
+let prevGraspButtonState
+function handleGraspButton( device ) {
+    if(device.pressed) {
+        if(prevGraspButtonState === false || prevGraspButtonState === undefined ) {
+            // Toggle grasping
+            if(grasping === false) grasping = true
+            else grasping = false
+        }
+    }
+    prevGraspButtonState = device.pressed
+}
+
 /* HANDLE LAYER CONTROL */
 function handleLayerControl() {
     const controlName = controls["Layer Toggle"]
@@ -116,29 +150,29 @@ function handleLayerControl() {
     }
 }
 
-let prevButtonState
+let prevLayerButtonState
 function handleLayerButton( device ) {
     if(device.pressed) {
-        if(prevButtonState === false || prevButtonState === undefined) {
+        if(prevLayerButtonState === false || prevLayerButtonState === undefined) {
             toggleLayer()
         }
     }
-    prevButtonState = device.pressed
+    prevLayerButtonState = device.pressed
 }
 
-let prevSwitchState
+let prevLayerSwitchState
 function handleLayerSwitch( device ) {
     const switchSwitched = device.pressed
     if(switchSwitched) {
-        if( prevSwitchState === false || prevSwitchState === undefined) {
+        if( prevLayerSwitchState === false || prevLayerSwitchState === undefined) {
             setCurrentLayer( 1 )
         }
     } else {
-        if( prevSwitchState === true || prevSwitchState === undefined) {
+        if( prevLayerSwitchState === true || prevLayerSwitchState === undefined) {
             setCurrentLayer( 2 )
         }
     }
-    prevSwitchState = switchSwitched
+    prevLayerSwitchState = switchSwitched
 }
 
 

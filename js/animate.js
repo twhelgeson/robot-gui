@@ -3,26 +3,29 @@ import { scene } from './scene';
 import { storeManager } from './State';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
-import { robotEEIntersecting, updateRobot } from "./RobotTHREE";
-import updateControls from "./gamepad";
+import { robotEEIntersecting, robotStore, updateRobot } from "./RobotTHREE";
+import updateControls, { grasping } from "./gamepad";
 import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
 
 
+let targets = []
+let goals = []
+let goalTimers = []
 
-const position = new THREE.Vector3(4, 4, 0)
-const rotation = new THREE.Vector3(0, 0, 0)
-const targetBox = new TargetBox(position, rotation, scene)
-targetBox.hideBorder()
+const COOLDOWN_SECONDS = 2
 
-const position1 = new THREE.Vector3(3, 2, 1)
-const rotation1 = new THREE.Vector3(0, 0, 0)
-const goalBox = new TargetBox(position1, rotation1, scene, {x: 2, y: 3, z: 2})
-goalBox.setBorderColor( TargetBox.colors.green )
-goalBox.hideMesh()
-goalBox.hideAttachmentPoint()
-// goalBox.setBoundColor(TargetBox.colors.green)
+createGoal(
+    new THREE.Vector3(1, 2, 3),
+    new THREE.Vector3(0, 0, 0),
+    TargetBox.colors.green
+)
 
+createTarget(
+    new THREE.Vector3(0, 5, 1),
+    new THREE.Vector3(0, 0, 0),
+    TargetBox.colors.green
+)
 
 const progressBarContainer = document.querySelector('.progress-bar-container')
 manager.onLoad = function ( ) {
@@ -44,49 +47,47 @@ const bounds = {
 }
 
 let counter = 0
-let stuckOn = false
 
 export function animate() {
-    // wait for objects to fully load
-    if(counter < 2) counter++
-    if(counter === 2) progressBarContainer.style.display = 'none'
+    if(counter < 3) counter++
+    if(counter === 2) progressBarContainer.style.display = "none"
 
-    const state = storeManager.getStore("Robot").getState()
-    const target = state.target
+    for(const target of targets) {
+        // arm end effector is touching attachment point
+        const armInRange = robotEEIntersecting( target.attachmentPointBound )
+            
+        // arm angle is aligned with target
+        const armTargetDot = robotEEOrientation.dot( target.orientation )
+        const armAligned = Math.abs( armTargetDot + 1 ) < 0.02
 
-    targetBox.setColor( TargetBox.colors.blue )
-    const inGoal = goalBox.boundingBox.containsBox(targetBox.boundingBox)
+        // Indicate whether arm is properly aligned
+        updateTargetColors(target, armInRange, armAligned, grasping )
 
-    const armTargetDot = robotEEOrientation.dot( targetBox.orientation )
-    const armTargetAligned = Math.abs( armTargetDot + 1 ) < 0.01
+        if( armInRange && armAligned && grasping ) {
+            const robotTarget = robotStore.getState().target
+            target.attach( robotTarget.position, robotTarget.rotation )
+        }
 
-    const targetGoalDot = goalBox.orientation.dot( targetBox.orientation )
-    const targetGoalAligned = Math.abs( targetGoalDot - 1 ) < 0.01
+        for(let i = 0; i < goals.length; i++) {
+            const goal = goals[i]
+            // Make sure colors are proper
+            if(goal.border.color !== target.mesh.color) continue
 
-    if(robotEEIntersecting(targetBox.attachmentPointBound) && armTargetAligned ) {
-        targetBox.setColor( TargetBox.colors.green )
-        // targetBox.setPosition( target.position )
-        stuckOn = true
-    }
+            // Check if box has been placed
+            if(!grasping && goalTimers[i] > COOLDOWN_SECONDS) {
+                target.transform( getRandomPosition( bounds ), getRandomRotation() )
+            }
 
-    if(stuckOn) targetBox.attach( target.position, target.rotation )
+            // Update cooldown border
+            if(grasping && goal.boundingBox.containsBox(target.boundingBox)) {
+                goalTimers[i] += 1/60
 
-    targetBox.setAttachmentPointColor( TargetBox.colors.yellow )
-    if(armTargetAligned) {
-        targetBox.setAttachmentPointColor( TargetBox.colors.green )
-    }
-
-    goalBox.setBorderColor( TargetBox.colors.green )
-    if(inGoal) {
-        goalBox.setBorderColor( TargetBox.colors.cyan )
-        if(!attach) {
-            targetBox.detach()
-            stuckOn = false
-            const targetPos = getRandomPosition( bounds );
-            const targetRot = getRandomRotation()
-            const targetRotArr = [ targetRot.x, targetRot.y, targetRot.z ]
-            console.log(targetRotArr.map(function(x) { return (x * 180) / Math.PI}))
-            targetBox.transform( targetPos, targetRot )
+                goal.setProgressBorderProp( goalTimers[i] / COOLDOWN_SECONDS)
+                // goal.setBorderColor( TargetBox.colors.cyan )
+            } else {
+                goalTimers[i] = 0
+                goal.setProgressBorderProp(0)
+            }
         }
     }
 
@@ -101,9 +102,22 @@ export function animate() {
     }, 1000 / 60 );
 };
 
+
+
+
+/* HELPER FUNCTIONS */
+
+// Randomization
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); 
+    // The maximum is exclusive and the minimum is inclusive
+  }
 
 function getRandomPosition( bounds ) {
     const x = getRandomArbitrary( bounds.x.min, bounds.x.max )
@@ -119,4 +133,62 @@ function getRandomRotation() {
     const z = getRandomArbitrary(-Math.PI, Math.PI)
 
     return { x: x, y: y, z: z }
+}
+
+function getRandomColorRGB() {
+    const int = getRandomInt(0, 3)
+
+    switch(int) {
+        case 0:
+            return TargetBox.colors.red
+        case 1:
+            return TargetBox.colors.green
+        case 2:
+            return TargetBox.colors.blue
+        default:
+            return TargetBox.colors.red
+    }
+    
+}
+
+
+// Creating targets/goals
+
+function createTarget( position, rotation, color ) {
+    const target = new TargetBox(position, rotation, scene)
+    target.setBorderColor( TargetBox.colors.black )
+    target.setColor( color )
+
+    targets.push( target )
+}
+
+function createGoal( position, rotation, color ) {
+    const goal = new TargetBox(position, rotation, scene, {x: 2, y: 3, z: 2})
+    goal.setBorderColor( color )
+    goal.hideMesh()
+    goal.hideAttachmentPoint()
+    goal.addProgressBorder()
+    goal.setProgressBorderProp( 0 )
+
+    goals.push(goal)
+    goalTimers.push(0)
+}
+
+// Handle target interactions
+
+function updateTargetColors( target, armInRange, armAligned, grasping ) {
+
+    // Handle attachment point colors
+    let attachmentPointColor = TargetBox.colors.orange
+    if(armAligned) attachmentPointColor = TargetBox.colors.cyan
+
+    // Handle border of target
+    if(armInRange && armAligned) {
+        if(grasping) attachmentPointColor = TargetBox.colors.black
+        target.setBorderColor( TargetBox.colors.cyan )
+    } else {
+        target.setBorderColor( TargetBox.colors.black )
+    }
+
+    target.setAttachmentPointColor(attachmentPointColor)
 }

@@ -50,7 +50,8 @@
                 "increment joint 5 angle": "none",
                 "decrement joint 5 angle": "none"
             }
-        }
+        },
+        "Grasp": "none"
     },
     "Controls Layer 2": {
         "End Effector Controls": {
@@ -102,6 +103,7 @@
                 "increment joint 5 angle": "none",
                 "decrement joint 5 angle": "none"
             }
-        }
+        },
+        "Grasp": "none"
     }
 }

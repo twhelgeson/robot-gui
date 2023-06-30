@@ -7,7 +7,9 @@ export class TargetBox {
         green: 0x00ff00,
         blue: 0x0000ff,
         cyan: 0x00ffff,
-        yellow: 0xffff00
+        yellow: 0xffff00,
+        orange: 0xff8800,
+        black: 0x000000
     }
 
     static upVector = new THREE.Vector3( 0, 0, 1 )
@@ -30,7 +32,7 @@ export class TargetBox {
         // Create bounding box
         this.boundingBox = new THREE.Box3().setFromObject( this.mesh )
         this.boundingBoxHelper = new THREE.Box3Helper( this.boundingBox, 0xffff00 )
-        this.scene.add( this.boundingBoxHelper )
+        // this.scene.add( this.boundingBoxHelper )
 
         // Add border
         const corners = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
@@ -43,10 +45,25 @@ export class TargetBox {
             opacity: 1,
             resolution: resolution,
             sizeAttenuation: false,
-            lineWidth: 10,
+            lineWidth: 12,
         })
         this.border = new MeshLine(borderGeometry, borderMaterial)
         this.box.add(this.border)
+
+
+        // Add second border to show progress of cube
+        const progressBorderMaterial = new MeshLineMaterial({		
+            useMap: false,
+            color: new THREE.Color("darkgreen"),
+            opacity: 1,
+            resolution: resolution,
+            sizeAttenuation: false,
+            lineWidth: 12,
+            visibility: 0.75,
+            transparent: true
+        })
+        this.progressBorder = new MeshLine( borderGeometry, progressBorderMaterial)
+        // this.box.add(this.progressBorder)
 
         // Add attachment point
         const attachmentGeometry = new THREE.SphereGeometry(0.3, 32, 16)
@@ -100,10 +117,6 @@ export class TargetBox {
         this.transform( position, newRotation )
     }
 
-    detach() {
-        this.previousRotation = undefined
-    }
-
     transform( position, rotation ) {
 
         this.box.position.set( position.x, position.y, position.z )
@@ -144,10 +157,22 @@ export class TargetBox {
         this.border.visible = false
     }
 
+    addProgressBorder() {
+        this.box.add(this.progressBorder)
+    }
+
+    removeProgressBorder() {
+        this.progressBorder.removeFromParent()
+    }
+
     showAttachmentPoint() {
         this.scene.add(this.attachmentPoint)
         this.boundingBox.setFromObject( this.box )
         
+    }
+
+    setProgressBorderProp( prop ) {
+        this.progressBorder.material.visibility = prop
     }
 
     hideAttachmentPoint() {
