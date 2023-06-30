@@ -18,6 +18,9 @@ export class TargetBox {
                  scale = {x: 1, y: 1, z: 1}, 
                  color = TargetBox.colors.blue ) {
 
+        this.color = color
+        this.borderColor = color
+
         // Group to hold each part of the box
         this.box = new THREE.Group()
 
@@ -99,10 +102,12 @@ export class TargetBox {
     }
 
     setColor( color ) {
+        this.color = color
         this.material.color.setHex( color )
     }
 
     setBorderColor( color ) {
+        this.borderColor = color
         this.border.material.color.setHex( color ) 
     }
     

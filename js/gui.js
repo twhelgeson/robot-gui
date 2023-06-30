@@ -80,7 +80,9 @@ function createControls() {
     createAxisControls()
 
     //Add gripper controls
-    gui.add(editControls, "Grasp", getBinaryControlNames( mapping ))
+    const binaryList = getBinaryControlNames( mapping )
+    binaryList.unshift("none")
+    gui.add(editControls, "Grasp", binaryList)
 }
 
 // Create all the incremental controls

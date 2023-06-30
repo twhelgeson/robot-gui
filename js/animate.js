@@ -18,7 +18,22 @@ const COOLDOWN_SECONDS = 2
 createGoal(
     new THREE.Vector3(1, 2, 3),
     new THREE.Vector3(0, 0, 0),
-    TargetBox.colors.green
+    TargetBox.colors.green,
+    new THREE.Color("darkgreen")
+)
+
+createGoal(
+    new THREE.Vector3(4, 2, 3),
+    new THREE.Vector3(0, 0, 0),
+    TargetBox.colors.red,
+    new THREE.Color("darkred")
+)
+
+createGoal(
+    new THREE.Vector3(4, 7, 3),
+    new THREE.Vector3(0, 0, 0),
+    TargetBox.colors.blue,
+    new THREE.Color("cyan")
 )
 
 createTarget(
@@ -71,11 +86,12 @@ export function animate() {
         for(let i = 0; i < goals.length; i++) {
             const goal = goals[i]
             // Make sure colors are proper
-            if(goal.border.color !== target.mesh.color) continue
+            if(goal.borderColor !== target.color) continue
 
             // Check if box has been placed
             if(!grasping && goalTimers[i] > COOLDOWN_SECONDS) {
                 target.transform( getRandomPosition( bounds ), getRandomRotation() )
+                target.setColor( getRandomColorRGB() )
             }
 
             // Update cooldown border
@@ -162,13 +178,14 @@ function createTarget( position, rotation, color ) {
     targets.push( target )
 }
 
-function createGoal( position, rotation, color ) {
+function createGoal( position, rotation, color, progressColor ) {
     const goal = new TargetBox(position, rotation, scene, {x: 2, y: 3, z: 2})
     goal.setBorderColor( color )
     goal.hideMesh()
     goal.hideAttachmentPoint()
     goal.addProgressBorder()
     goal.setProgressBorderProp( 0 )
+    goal.progressBorder.material.color = progressColor
 
     goals.push(goal)
     goalTimers.push(0)
