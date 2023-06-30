@@ -1,16 +1,13 @@
 import * as THREE from 'three'
 import { scene } from './scene';
-import { updateTarget } from "./Target"
 import { storeManager } from './State';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
-import { getRobotEERotation, robotEEIntersecting, updateRobotBounds } from "./RobotTHREE";
-import { robotIntersecting } from "./RobotTHREE";
-import { targetCylinder } from "./Target";
+import { robotEEIntersecting, updateRobot } from "./RobotTHREE";
 import updateControls from "./gamepad";
 import { TargetBox } from "./targetBox";
+import { robotEEOrientation } from './RobotTHREE';
 
-import { targetBB } from "./Target";
 
 
 const position = new THREE.Vector3(4, 4, 0)
@@ -47,6 +44,7 @@ const bounds = {
 }
 
 let counter = 0
+let stuckOn = false
 
 export function animate() {
     // wait for objects to fully load
@@ -54,29 +52,46 @@ export function animate() {
     if(counter === 2) progressBarContainer.style.display = 'none'
 
     const state = storeManager.getStore("Robot").getState()
+    const target = state.target
 
     targetBox.setColor( TargetBox.colors.blue )
     const inGoal = goalBox.boundingBox.containsBox(targetBox.boundingBox)
 
-    if(robotEEIntersecting(targetBox.attachmentPointBound)) {
+    const armTargetDot = robotEEOrientation.dot( targetBox.orientation )
+    const armTargetAligned = Math.abs( armTargetDot + 1 ) < 0.01
+
+    const targetGoalDot = goalBox.orientation.dot( targetBox.orientation )
+    const targetGoalAligned = Math.abs( targetGoalDot - 1 ) < 0.01
+
+    if(robotEEIntersecting(targetBox.attachmentPointBound) && armTargetAligned ) {
         targetBox.setColor( TargetBox.colors.green )
-
-        const target = state.target
         // targetBox.setPosition( target.position )
-        targetBox.attach( target.position, target.rotation )
+        stuckOn = true
+    }
 
+    if(stuckOn) targetBox.attach( target.position, target.rotation )
+
+    targetBox.setAttachmentPointColor( TargetBox.colors.yellow )
+    if(armTargetAligned) {
+        targetBox.setAttachmentPointColor( TargetBox.colors.green )
     }
 
     goalBox.setBorderColor( TargetBox.colors.green )
     if(inGoal) {
         goalBox.setBorderColor( TargetBox.colors.cyan )
         if(!attach) {
-            targetBox.setPosition( getRandomPosition( bounds ) )
+            targetBox.detach()
+            stuckOn = false
+            const targetPos = getRandomPosition( bounds );
+            const targetRot = getRandomRotation()
+            const targetRotArr = [ targetRot.x, targetRot.y, targetRot.z ]
+            console.log(targetRotArr.map(function(x) { return (x * 180) / Math.PI}))
+            targetBox.transform( targetPos, targetRot )
         }
     }
 
+    updateRobot()
     updateControls()
-    updateRobotBounds()
     updateCamera()
 
     setTimeout( function() {
@@ -96,4 +111,12 @@ function getRandomPosition( bounds ) {
     const z = getRandomArbitrary( bounds.z.min, bounds.z.max )
 
     return new THREE.Vector3( x, y, z )
+}
+
+function getRandomRotation() {
+    const x = Math.PI / 2
+    const y = Math.PI / 2
+    const z = 0
+
+    return { x: x, y: y, z: z }
 }

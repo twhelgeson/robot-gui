@@ -45,7 +45,7 @@ const defaultRobotState = {
     J1: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
     J2: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
     J3: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
-    J4: [-120 / 180 * Math.PI, 120 / 180 * Math.PI],
+    J4: [-160 / 180 * Math.PI, 160 / 180 * Math.PI],
     J5: [-270 / 180 * Math.PI, 270 / 180 * Math.PI],
   },
   configuration: [false, false, false],
@@ -158,7 +158,7 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
       jointOutOfBound: [...outOfBounds],
     })
   } else {
-    return Object.assign({}, state, data)
+    return Object.assign({}, state, state)
   }
 })
 

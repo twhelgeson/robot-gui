@@ -28,13 +28,13 @@ export class RobotController {
     }
 
     setPosition( axis, position ) {
-        this.EEposition[ axis ] = position
-        this.#setRobotTarget( this.EEposition, this.EErotation )
+        const newPosition = setDictVal( this.EEposition, axis, position )
+        this.#setRobotTarget( newPosition, this.EErotation )
     }
 
     setRotation( axis, rotation ) {
-        this.EErotation[ axis ] = rotation
-        this.#setRobotTarget( this.EEposition, this.EErotation )
+        const newRotation = setDictVal( this.EErotation, axis, rotation )
+        this.#setRobotTarget( this.EEposition, newRotation )
     }
 
     incrementJoint( jointNumber ) { this.moveJoint( jointNumber, 1 ) }
@@ -97,5 +97,12 @@ function incrementDictVal( dict, key, amount ) {
     var dictCopy = {}
     Object.assign( dictCopy, dict )
     dictCopy[ key ] += amount
+    return dictCopy
+}
+
+function setDictVal( dict, key, val ) {
+    var dictCopy = {}
+    Object.assign( dictCopy, dict )
+    dictCopy[ key ] = val
     return dictCopy
 }

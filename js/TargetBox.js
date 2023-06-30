@@ -10,10 +10,11 @@ export class TargetBox {
         yellow: 0xffff00
     }
 
+    static upVector = new THREE.Vector3( 0, 0, 1 )
+
     constructor( position, rotation, scene, 
                  scale = {x: 1, y: 1, z: 1}, 
-                 color = TargetBox.colors.blue ) 
-    {
+                 color = TargetBox.colors.blue ) {
 
         // Group to hold each part of the box
         this.box = new THREE.Group()
@@ -28,7 +29,7 @@ export class TargetBox {
         // Create bounding box
         this.boundingBox = new THREE.Box3().setFromObject( this.mesh )
         this.boundingBoxHelper = new THREE.Box3Helper( this.boundingBox, 0xffff00 )
-        // scene.add( this.boundingBoxHelper )
+        scene.add( this.boundingBoxHelper )
 
         // Add border
         const corners = getCornersOfCube( this.boundingBox.min, this.boundingBox.max )
@@ -61,14 +62,22 @@ export class TargetBox {
         // Add whole group to scene
         scene.add(this.box)
 
+        // Make vector represent orientation of box
+        this.orientation = new THREE.Vector3().copy( TargetBox.upVector )
+        this.orientation.normalize();
+
+        const origin = new THREE.Vector3( 0, 0, 0 )
+        const length = 1
+
+        this.arrowHelper = new THREE.ArrowHelper( this.orientation, origin, length, TargetBox.colors.yellow )
+        scene.add( this.arrowHelper )
+        
         // Position in scene
         this.setPosition(position)
         this.setRotation(rotation)
 
-        console.log(this.attachmentPointBound)
-
+        // Used to track the previous rotation when attached to arm
         this.attachedRotation
-
     }
 
     setColor( color ) {
@@ -77,6 +86,10 @@ export class TargetBox {
 
     setBorderColor( color ) {
         this.border.material.color.setHex( color ) 
+    }
+    
+    setAttachmentPointColor( color ) {
+        this.attachmentPoint.material.color.setHex( color )
     }
 
     attach( position, rotation ) {
@@ -98,14 +111,24 @@ export class TargetBox {
         this.attachedRotation = rotation
     }
 
+    detach() {
+        this.attachedRotation = undefined
+    }
+
     transform( position, rotation ) {
 
         this.box.position.set( position.x, position.y, position.z )
         this.box.rotation.set( rotation.x, rotation.y, rotation.z )
 
+        // Update bounding box
         this.boundingBox.setFromObject( this.box )
         this.attachmentPointBound.copy( this.attachmentPoint.geometry.boundingSphere )
             .applyMatrix4( this.attachmentPoint.matrixWorld )
+
+        
+        this.orientation.copy( TargetBox.upVector ).applyQuaternion( this.box.quaternion )
+        this.orientation.normalize()
+        this.arrowHelper.setDirection( this.orientation )
     }
 
     setPosition( position ) {

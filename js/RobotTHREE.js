@@ -51,8 +51,33 @@ function buildRobot(state) {
   VisualRobot = new THREERobot(geometry, jointLimits, THREESimulationRobot)
 }
 
-export function updateRobotBounds() {
+// Make vector represent orientation of end effector
+const initOrientation = new THREE.Vector3( 0, 0, 1 )
+const robotEEOrientation = new THREE.Vector3().copy( initOrientation )
+const orientationRotation = new THREE.Euler( 0, 0, 0, "XYZ" )
+
+const origin = new THREE.Vector3( 0, 0, 0 )
+const length = 1
+const hex = 0xff00ff
+
+const arrowHelper = new THREE.ArrowHelper( robotEEOrientation, origin, length, hex )
+scene.add( arrowHelper )
+
+
+function updateEEOrientationVector() {
+  const EErotation = robotStore.getState().target.rotation
+  orientationRotation.setFromVector3( EErotation )
+  robotEEOrientation.copy( initOrientation ).applyEuler( orientationRotation )
+  arrowHelper.setDirection( robotEEOrientation )
+}
+
+function updateRobotBounds() {
   VisualRobot.updateBounds()
+}
+
+export function updateRobot() {
+  updateEEOrientationVector()
+  updateRobotBounds()
 }
 
 export function robotIntersecting(boundingBox) {
@@ -63,8 +88,5 @@ export function robotEEIntersecting(boundingBox) {
   return VisualRobot.intersectingEE(boundingBox)
 }
 
-export function getRobotEERotation() {
-  return VisualRobot.getEERotation()
-}
-
 export { robotStore }
+export { robotEEOrientation }
