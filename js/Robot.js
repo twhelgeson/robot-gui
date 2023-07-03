@@ -160,8 +160,6 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
       jointOutOfBound: [...outOfBounds],
     })
   } else {
-    console.log(state)
-    console.log(data)
     return Object.assign({}, state)
   }
 })
