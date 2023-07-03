@@ -69,11 +69,12 @@ const bounds = {
 let counter = 0
 
 export function animate() {
+    robotController.goToGoal()
     // wait for objects to fully load
     if(counter < 3) counter++
     if(counter === 2) {
         progressBarContainer.style.display = 'none'
-        robotController.tween.start()
+        // robotController.tween.start()
     }
 
     for(const target of targets) {

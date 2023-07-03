@@ -1,7 +1,7 @@
 import * as TWEEN from '@tweenjs/tween.js'
 
-// units per second
-const MAX_VEL = 1
+// units per frame
+const MAX_VEL = 0.16 
 
 export class RobotController {
     static DEG_TO_RAD = Math.PI / 180
@@ -18,13 +18,7 @@ export class RobotController {
         this.rotStep = rotStep
         this.transStep = transStep
 
-        this.tween = new TWEEN.Tween(this.EEposition)
-            .to({x: 0, y: 5, z: 0}, 500)
-            .dynamic(true)
-            .easing(TWEEN.Easing.Linear.None)
-            .onUpdate((tweenPosition) =>
-                this.#setRobotTarget(tweenPosition, this.EErotation)
-            )
+        this.goal = { x: 0, y: 5, z: 0.75 }
     }
 
     setTransStep( step ) {
@@ -41,8 +35,8 @@ export class RobotController {
     }
 
     setPosition( axis, position ) {
-        this.EEposition[ axis ] = position
-        this.#setTweenTarget( this.EEposition, this.EErotation )
+        this.goal[ axis ] = position
+        // this.#setTweenTarget( this.EEposition, this.EErotation )
     }
 
     setRotation( axis, rotation ) {
@@ -79,8 +73,7 @@ export class RobotController {
     }
 
     moveAlongAxisAmt( axis, amt ) {
-        const position = incrementDictVal(this.EEposition, axis, amt)
-        this.#setTweenTarget( position, this.EErotation )
+        this.goal[ axis ] += amt
     }
 
     rotateAroundAxisAmt( axis, amt ) {
@@ -95,9 +88,39 @@ export class RobotController {
     }
 
     #setTweenTarget(position) {
-        this.tween.stop()
-        this.tween.to(position, 10)
-        this.tween.startFromCurrentValues()
+
+    }
+
+    goToGoal() {
+        let totalDiff = 0
+        let diffs = { x: 0, y: 0, z: 0 }
+        for( let axisName in this.goal ) {
+            const goalAxis = this.goal[ axisName ]
+            const eeAxis = this.EEposition[ axisName ]
+            const diff = goalAxis - eeAxis
+
+            diffs[ axisName ] = diff
+            totalDiff += Math.abs( diff )
+        }
+
+        // console.log ( diffs )    
+
+        for( let axisName in this.goal ) {
+            const goalAxis = this.goal[ axisName ]
+            const diff = diffs[ axisName ]
+            let prop = 1
+            if (totalDiff !== 0) prop = Math.abs( diff / totalDiff )
+            const propVel = MAX_VEL * prop
+
+            if( Math.abs( diff ) < propVel / 2 ) {
+                this.EEposition[ axisName ] = goalAxis
+                continue
+            } 
+
+            this.EEposition[ axisName ] += propVel * Math.sign( diff )
+        }
+
+        this.#setRobotTarget(this.EEposition, this.EErotation)
     }
 
     #setRobotTarget( position, rotation ) {
