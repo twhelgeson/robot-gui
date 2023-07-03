@@ -1,7 +1,8 @@
 import * as TWEEN from '@tweenjs/tween.js'
 
 // units per frame
-const MAX_VEL = 0.16 
+const MAX_TRANS_VEL = 0.16 
+const MAX_ROT_VEL = 0.1
 
 export class RobotController {
     static DEG_TO_RAD = Math.PI / 180
@@ -11,14 +12,15 @@ export class RobotController {
         
         // Robot current state
         this.angles = robotStore.getState().angles
-        this.EEposition = robotStore.getState().target.position
-        this.EErotation = robotStore.getState().target.rotation
+        this.eePosition = robotStore.getState().target.position
+        this.eeRotation = robotStore.getState().target.rotation
     
         // How much to move by
         this.rotStep = rotStep
         this.transStep = transStep
 
-        this.goal = { x: 0, y: 5, z: 0.75 }
+        this.positionGoal = { x: 0, y: 5, z: 0.75 }
+        this.rotationGoal = { x: -Math.PI, y: 0, z: 0 }
     }
 
     setTransStep( step ) {
@@ -35,13 +37,12 @@ export class RobotController {
     }
 
     setPosition( axis, position ) {
-        this.goal[ axis ] = position
+        this.positionGoal[ axis ] = position
         // this.#setTweenTarget( this.EEposition, this.EErotation )
     }
 
     setRotation( axis, rotation ) {
-        this.EErotation[ axis ] = rotation
-        this.#setTweenTarget( this.EEposition, this.EErotation )
+        this.rotationGoal[ axis ] = rotation
     }
 
     incrementJoint( jointNumber ) { this.moveJoint( jointNumber, 1 ) }
@@ -73,18 +74,17 @@ export class RobotController {
     }
 
     moveAlongAxisAmt( axis, amt ) {
-        this.goal[ axis ] += amt
+        this.positionGoal[ axis ] += amt
     }
 
     rotateAroundAxisAmt( axis, amt ) {
-        const rotation = incrementDictVal(this.EErotation, axis, amt)
-        this.#setTweenTarget( this.EEposition, rotation )
+        this.rotationGoal[ axis ] += amt
     }
 
     #updateState() {
         this.angles = this.robotStore.getState().angles
-        this.EEposition = this.robotStore.getState().target.position
-        this.EErotation = this.robotStore.getState().target.rotation
+        this.eePosition = this.robotStore.getState().target.position
+        this.eeRotation = this.robotStore.getState().target.rotation
     }
 
     #setTweenTarget(position) {
@@ -92,35 +92,37 @@ export class RobotController {
     }
 
     goToGoal() {
+        this.tween( this.eeRotation, this.rotationGoal, MAX_ROT_VEL )
+        this.tween( this.eePosition, this.positionGoal, MAX_TRANS_VEL )
+        this.#setRobotTarget(this.eePosition, this.eeRotation)
+    }
+
+    tween( state, goal, max_vel ) {
         let totalDiff = 0
         let diffs = { x: 0, y: 0, z: 0 }
-        for( let axisName in this.goal ) {
-            const goalAxis = this.goal[ axisName ]
-            const eeAxis = this.EEposition[ axisName ]
+        for( let axisName in goal ) {
+            const goalAxis = goal[ axisName ]
+            const eeAxis = state[ axisName ]
             const diff = goalAxis - eeAxis
 
             diffs[ axisName ] = diff
             totalDiff += Math.abs( diff )
-        }
+        }   
 
-        // console.log ( diffs )    
-
-        for( let axisName in this.goal ) {
-            const goalAxis = this.goal[ axisName ]
+        for( let axisName in goal ) {
+            const goalAxis = goal[ axisName ]
             const diff = diffs[ axisName ]
             let prop = 1
             if (totalDiff !== 0) prop = Math.abs( diff / totalDiff )
-            const propVel = MAX_VEL * prop
+            const propVel = max_vel * prop
 
             if( Math.abs( diff ) < propVel / 2 ) {
-                this.EEposition[ axisName ] = goalAxis
+                state[ axisName ] = goalAxis
                 continue
             } 
 
-            this.EEposition[ axisName ] += propVel * Math.sign( diff )
+            state[ axisName ] += propVel * Math.sign( diff )
         }
-
-        this.#setRobotTarget(this.EEposition, this.EErotation)
     }
 
     #setRobotTarget( position, rotation ) {

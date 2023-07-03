@@ -67,15 +67,16 @@ const bounds = {
 }
 
 let counter = 0
-
+let startUpdatingArm = false
 export function animate() {
-    robotController.goToGoal()
     // wait for objects to fully load
     if(counter < 3) counter++
     if(counter === 2) {
         progressBarContainer.style.display = 'none'
-        // robotController.tween.start()
+        startUpdatingArm = true
     }
+    
+    if( startUpdatingArm ) robotController.goToGoal()
 
     for(const target of targets) {
         // arm end effector is touching attachment point
