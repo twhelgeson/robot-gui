@@ -1,4 +1,4 @@
-import * as TWEEN from '@tweenjs/tween.js'
+import { robotInvalid } from "./Robot"
 
 // units per frame
 const MAX_TRANS_VEL = 0.16 
@@ -19,7 +19,7 @@ export class RobotController {
         this.rotStep = rotStep
         this.transStep = transStep
 
-        this.positionGoal = { x: 0, y: 5, z: 0.75 }
+        this.positionGoal = { x: 0, y: 5, z: 1 }
         this.rotationGoal = { x: -Math.PI, y: 0, z: 0 }
     }
 

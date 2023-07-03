@@ -141,7 +141,7 @@ export default class THREERobot {
       cube.position.copy(mesh.userData.obb.center)
       cube.setRotationFromMatrix(rotation4)
       this.bbHelpers.push(cube)
-      scene.add(cube)
+      // scene.add(cube)
     }
 
   }

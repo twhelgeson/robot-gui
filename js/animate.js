@@ -2,15 +2,13 @@ import * as THREE from 'three'
 import * as TWEEN from '@tweenjs/tween.js'
 
 import { scene } from './scene';
-import { storeManager } from './State';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
 import { robotEEIntersecting, robotStore, updateRobot } from "./RobotTHREE";
 import updateControls, { grasping } from "./gamepad";
 import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
-
-import { targetBB } from "./Target";
+import { robotInvalid } from './Robot';
 import { robotController } from './RobotEEControl';
 
 
@@ -75,7 +73,7 @@ export function animate() {
         progressBarContainer.style.display = 'none'
         startUpdatingArm = true
     }
-    
+
     if( startUpdatingArm ) robotController.goToGoal()
 
     for(const target of targets) {
@@ -91,7 +89,8 @@ export function animate() {
 
         if( armInRange && armAligned && grasping ) {
             const robotTarget = robotStore.getState().target
-            target.attach( robotTarget.position, robotTarget.rotation )
+            // console.log(robotTarget.position)
+            if(!robotInvalid) target.attach( robotTarget.position, robotTarget.rotation )
         }
 
         for(let i = 0; i < goals.length; i++) {

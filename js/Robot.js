@@ -119,6 +119,8 @@ const calculateAngles = (jointLimits, position, rotation, configuration) => {
   }
 }
 
+export var robotInvalid = false
+
 /* --- Reducer --- */
 robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
   const {
@@ -131,15 +133,15 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
     anglesDeg[i] = anglesDeg[i] / Math.PI * 180
   }
 
-  let invalid = false
+  robotInvalid = false
   for(let out of outOfBounds) {
-    if(out) invalid = true
+    if(out) robotInvalid = true
   }
   for(let angle of angles) {
-    if(isNaN(angle)) invalid = true
+    if(isNaN(angle)) robotInvalid = true
   }
 
-  if(!invalid) {
+  if(!robotInvalid) {
     return Object.assign({}, state, {
       target: {
         position: Object.assign({}, data.position),
@@ -158,7 +160,9 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
       jointOutOfBound: [...outOfBounds],
     })
   } else {
-    return Object.assign({}, state, state)
+    console.log(state)
+    console.log(data)
+    return Object.assign({}, state)
   }
 })
 
@@ -174,21 +178,9 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
     TCPpose,
   )
 
-  let anglesDeg = {
-    A0: angles.A0 / Math.PI * 180,
-    A1: angles.A1 / Math.PI * 180,
-    A2: angles.A2 / Math.PI * 180,
-    A3: angles.A3 / Math.PI * 180,
-    A4: angles.A4 / Math.PI * 180,
-    A5: angles.A5 / Math.PI * 180,
-  }
+  robotInvalid = false;
 
-  let invalid = false;
-
-  let angleKeys = Object.keys(angles)
-  let limitKeys = Object.keys(state.jointLimits)
-
-  
+  let angleKeys = Object.keys(angles)  
 
   for(let i = 0; i < angleKeys.length; i++) {
     let angleKey = Object.keys(angles)[i]
@@ -196,12 +188,12 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
 
     if(angles[angleKey] < state.jointLimits[limitKey][0] ||
        angles[angleKey] > state.jointLimits[limitKey][1]) {
-        invalid = true
+        robotInvalid = true
        }
   }
 
   // IK.calculateAngles(TCPpose[0], TCPpose[1], TCPpose[2], TCPpose[3], TCPpose[4], TCPpose[5], angles)
-  if(!invalid) {
+  if(!robotInvalid) {
     return Object.assign({}, state, {
       target: {
         position: {
