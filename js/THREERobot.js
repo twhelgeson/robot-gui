@@ -143,7 +143,7 @@ export default class THREERobot {
       cube.setRotationFromMatrix(rotation4)
       this.bbHelpers.push(cube)
       // console.log(cube)
-      scene.add(cube)
+      // scene.add(cube)
     }
 
   }

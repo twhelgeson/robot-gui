@@ -91,7 +91,7 @@ export class TargetBox {
         const length = 1
 
         this.arrowHelper = new THREE.ArrowHelper( this.orientation, origin, length, TargetBox.colors.yellow )
-        this.scene.add( this.arrowHelper )
+        // this.scene.add( this.arrowHelper )
         
         // Position in scene
         this.setPosition(position)

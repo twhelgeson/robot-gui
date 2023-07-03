@@ -61,7 +61,7 @@ const length = 1
 const hex = 0xff00ff
 
 const arrowHelper = new THREE.ArrowHelper( robotEEOrientation, origin, length, hex )
-scene.add( arrowHelper )
+// scene.add( arrowHelper )
 
 
 function updateEEOrientationVector() {

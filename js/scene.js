@@ -48,10 +48,10 @@ manager.onError = function ( url ) {
 
 // For dev
 const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
+// scene.add( axesHelper );
 
 // load background and space station
-// loadEnv()
+loadEnv()
 
 /* HELPER FUNCTIONS */
 
