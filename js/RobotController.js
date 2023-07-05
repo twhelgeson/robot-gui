@@ -85,30 +85,39 @@ export class RobotController {
     }
 
     #updateState() {
-        this.angles = this.robotStore.getState().angles
-        this.eePosition = this.robotStore.getState().target.position
-        this.eeRotation = this.robotStore.getState().target.rotation
+        Object.assign(this.angles, this.robotStore.getState().angles)
+        Object.assign(this.eePosition, this.robotStore.getState().target.position)
+        Object.assign(this.eeRotation, this.robotStore.getState().target.rotation)
     }
 
+    // runs periodically to move robot to goal state
     goToGoal() {
         this.calcAtGoals()
         const goals = [ this.atAngleGoal, this.atPositionGoal, this.atRotationGoal ]
         // console.log(goals)
 
-        if(this.atAngleGoal) {
+        if(!this.atPositionGoal || !this.atRotationGoal) {
             this.tweenEndEffector( this.eeRotation, this.rotationGoal, MAX_ROT_VEL, "rotation" )
             this.tweenEndEffector( this.eePosition, this.positionGoal, MAX_TRANS_VEL, "position" )
             this.#setRobotTarget(this.eePosition, this.eeRotation)
-            Object.assign( this.angleGoal, this.angles )
+            Object.assign( this.angleGoal, this.angles ) 
 
-            return
+            if(robotInvalid) {
+                Object.assign(this.positionGoal, this.eePosition)
+                Object.assign( this.rotationGoal, this.eeRotation )
+            }
         }
 
-        this.tweenJoints( this.angles, this.angleGoal, MAX_ROT_VEL / 2 )
-        this.#setRobotAngles( this.angles )
-        Object.assign( this.positionGoal, this.eePosition )
-        Object.assign( this.rotationGoal, this.eeRotation )
-    
+        if(!this.atAngleGoal) {
+            this.tweenJoints( this.angles, this.angleGoal, MAX_ROT_VEL / 2 )
+            this.#setRobotAngles( this.angles )
+            Object.assign( this.positionGoal, this.eePosition )
+            Object.assign( this.rotationGoal, this.eeRotation )
+
+            if(robotInvalid) {
+                Object.assign( this.angleGoal, this.angles )
+            }
+        }
     }
 
     tweenEndEffector( state, goal, max_vel, mode ) {
@@ -117,7 +126,7 @@ export class RobotController {
         for( let axisName in goal ) {
             const goalAxis = goal[ axisName ]
             const eeAxis = state[ axisName ]
-            const diff = goalAxis - eeAxis
+            let diff = goalAxis - eeAxis
 
             diffs[ axisName ] = diff
             totalDiff += Math.abs( diff )

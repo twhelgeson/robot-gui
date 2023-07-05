@@ -11,7 +11,7 @@
                 "Z rotation": "none"
             },
             "Incremental Controls": {
-                "step size": 0.25,
+                "step size": 0.1,
                 "increment X position": "none",
                 "decrement X position": "none",
                 "increment Y position": "none",
@@ -36,7 +36,7 @@
                 "joint 5 angle": "none"
             },
             "Incremental Controls": {
-                "step size (degrees)": 10,
+                "step size (degrees)": 5,
                 "increment joint 0 angle": "none",
                 "decrement joint 0 angle": "none",
                 "increment joint 1 angle": "none",
