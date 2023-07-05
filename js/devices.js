@@ -74,11 +74,18 @@ export class Axis extends Device {
         super( gamepadIndex )
         this._axisIndex = axisIndex
         this._value = 0
+        this._values = []
     }
 
     get value() {
-        this._value = this.gamepad.axes[this._axisIndex]
+        const current_value = this.gamepad.axes[this._axisIndex]
+        this._values.push( current_value )
+        if(this._values.length > 20) this._values.shift()
+        this._value = average( this._values )
+
         return this._value
     }
 }
 
+// credit: https://stackoverflow.com/a/41452260
+const average = array => array.reduce((a, b) => a + b) / array.length;
