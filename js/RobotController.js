@@ -93,9 +93,9 @@ export class RobotController {
     goToGoal() {
         this.calcAtGoals()
         const goals = [ this.atAngleGoal, this.atPositionGoal, this.atRotationGoal ]
-        console.log(goals)
+        // console.log(goals)
 
-        if( this.atAngleGoal && (!this.atPositionGoal || !this.atRotationGoal)) {
+        if(this.atAngleGoal) {
             this.tweenEndEffector( this.eeRotation, this.rotationGoal, MAX_ROT_VEL, "rotation" )
             this.tweenEndEffector( this.eePosition, this.positionGoal, MAX_TRANS_VEL, "position" )
             this.#setRobotTarget(this.eePosition, this.eeRotation)
@@ -174,7 +174,7 @@ export class RobotController {
             const eeAxis = state[ axisName ]
             const diff = goalAxis - eeAxis
 
-            if( diff !== 0 ) there = false
+            if( Math.abs(diff) > 0.02 ) there = false
         } 
 
         return there
