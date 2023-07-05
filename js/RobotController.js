@@ -21,6 +21,12 @@ export class RobotController {
 
         this.positionGoal = { x: 0, y: 5, z: 1 }
         this.rotationGoal = { x: -Math.PI, y: 0, z: 0 }
+        this.angleGoal = { A0: Math.PI / 2, A1: 0, A2: 0, A3: 0, A4: 0, A5: 0 }
+
+        this.goToAngleGoal = false
+        this.atRotationGoal = false
+        this.atPositionGoal = false
+        this.atAngleGoal = true
     }
 
     setTransStep( step ) {
@@ -32,8 +38,7 @@ export class RobotController {
     }
 
     setJointAngle( jointNumber, angleRad ) {
-        this.angles[ "A" + jointNumber ] = angleRad
-        this.#setRobotAngles( this.angles )
+        this.angleGoal[ "A" + jointNumber ] = angleRad
     }
 
     setPosition( axis, position ) {
@@ -58,9 +63,7 @@ export class RobotController {
     }
 
     moveJointAmt( jointNumber, amt ) {
-        const key = "A" + jointNumber
-        const angles = incrementDictVal( this.angles, key, amt )
-        this.#setRobotAngles( angles )
+        this.angleGoal[ "A" + jointNumber ] += amt
     }
 
     moveAlongAxis( axis, direction ) {
@@ -87,17 +90,28 @@ export class RobotController {
         this.eeRotation = this.robotStore.getState().target.rotation
     }
 
-    #setTweenTarget(position) {
-
-    }
-
     goToGoal() {
-        this.tween( this.eeRotation, this.rotationGoal, MAX_ROT_VEL )
-        this.tween( this.eePosition, this.positionGoal, MAX_TRANS_VEL )
-        this.#setRobotTarget(this.eePosition, this.eeRotation)
+        this.calcAtGoals()
+        const goals = [ this.atAngleGoal, this.atPositionGoal, this.atRotationGoal ]
+        console.log(goals)
+
+        if( this.atAngleGoal && (!this.atPositionGoal || !this.atRotationGoal)) {
+            this.tweenEndEffector( this.eeRotation, this.rotationGoal, MAX_ROT_VEL, "rotation" )
+            this.tweenEndEffector( this.eePosition, this.positionGoal, MAX_TRANS_VEL, "position" )
+            this.#setRobotTarget(this.eePosition, this.eeRotation)
+            Object.assign( this.angleGoal, this.angles )
+
+            return
+        }
+
+        this.tweenJoints( this.angles, this.angleGoal, MAX_ROT_VEL / 2 )
+        this.#setRobotAngles( this.angles )
+        Object.assign( this.positionGoal, this.eePosition )
+        Object.assign( this.rotationGoal, this.eeRotation )
+    
     }
 
-    tween( state, goal, max_vel ) {
+    tweenEndEffector( state, goal, max_vel, mode ) {
         let totalDiff = 0
         let diffs = { x: 0, y: 0, z: 0 }
         for( let axisName in goal ) {
@@ -116,13 +130,54 @@ export class RobotController {
             if (totalDiff !== 0) prop = Math.abs( diff / totalDiff )
             const propVel = max_vel * prop
 
-            if( Math.abs( diff ) < propVel / 2 ) {
+            if( Math.abs( diff ) < propVel ) {
                 state[ axisName ] = goalAxis
                 continue
             } 
 
-            state[ axisName ] += propVel * Math.sign( diff )
+            const increment = propVel * Math.sign( diff )
+            const nextState = incrementDictVal( state, axisName, increment )
+            // const valid = checkValid( nextState )
+            /*if( valid ) */Object.assign( state, nextState )
         }
+    }
+
+    tweenJoints( state, goal, max_vel ) {
+
+        for( let axisName in goal ) {
+            const goalAxis = goal[ axisName ]
+            const eeAxis = state[ axisName ]
+            const diff = goalAxis - eeAxis
+
+            if( Math.abs( diff ) < max_vel ) {
+                state[ axisName ] = goalAxis
+                continue
+            }
+
+            const increment = max_vel * Math.sign( diff )
+            const nextState = incrementDictVal( state, axisName, increment )
+            // const valid = checkValid( nextState )
+            /*if( valid ) */Object.assign( state, nextState )
+        }  
+    }
+
+    calcAtGoals() {
+        this.atPositionGoal = this.atGoal( this.eePosition, this.positionGoal )
+        this.atRotationGoal = this.atGoal( this.eeRotation, this.rotationGoal )
+        this.atAngleGoal = this.atGoal( this.angles, this.angleGoal )
+    }
+
+    atGoal( state, goal ) {
+        let there = true
+        for( let axisName in goal ) {
+            const goalAxis = goal[ axisName ]
+            const eeAxis = state[ axisName ]
+            const diff = goalAxis - eeAxis
+
+            if( diff !== 0 ) there = false
+        } 
+
+        return there
     }
 
     #setRobotTarget( position, rotation ) {

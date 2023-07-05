@@ -91,6 +91,18 @@ robotStore.listen([state => state.geometry], (geometry) => {
   updateIK(geometry)
 })
 
+function checkOutOfBounds( angles, jointLimits ) {
+  var outOfBounds = [false, false, false, false, false, false]
+  let i = 0
+  for (const index in jointLimits) {
+    if (angles[i] < jointLimits[index][0] || angles[i] > jointLimits[index][1]) {
+      outOfBounds[i] = true
+    }
+    i++
+  }
+  return outOfBounds
+}
+
 const calculateAngles = (jointLimits, position, rotation, configuration) => {
   const angles = []
   IK.calculateAngles(
@@ -104,14 +116,7 @@ const calculateAngles = (jointLimits, position, rotation, configuration) => {
     configuration
   )
 
-  var outOfBounds = [false, false, false, false, false, false]
-  let i = 0
-  for (const index in jointLimits) {
-    if (angles[i] < jointLimits[index][0] || angles[i] > jointLimits[index][1]) {
-      outOfBounds[i] = true
-    }
-    i++
-  }
+  const outOfBounds = checkOutOfBounds( angles, jointLimits )
 
   return {
     angles,
@@ -160,7 +165,7 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
       jointOutOfBound: [...outOfBounds],
     })
   } else {
-    return Object.assign({}, state)
+    return Object.assign({}, state, data)
   }
 })
 
