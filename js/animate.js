@@ -298,6 +298,7 @@ function beginTimeTrial() {
     score = 0
     timeTrial = true
     start = Date.now();
+    controlGUI.hide()
 }
 
 function endTimeTrial() {
@@ -308,4 +309,5 @@ function endTimeTrial() {
     timerSeconds = TIME_TRIAL_LENGTH_SECONDS
     timerDisplay.style.color = "white"
     setClock(timerSeconds)
+    controlGUI.show()
 }
