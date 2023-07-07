@@ -45,11 +45,8 @@ export class TargetBox {
         const obbGeometry = new THREE.BoxGeometry( obbSize.x, obbSize.y, obbSize.z )
         const obbMaterial = new THREE.MeshBasicMaterial( {color: TargetBox.colors.yellow, wireframe: true })
         this.obbHelperMesh = new THREE.Mesh( obbGeometry, obbMaterial )
-        // const obbRotation = new THREE.Matrix4().makeRotationZ( (Math.PI) / 2 )
-        // this.mesh.userData.obb.rotation.setFromMatrix4( obbRotation )
         this.obbHelperMesh.position.copy( this.mesh.userData.obb.center )
-        // this.obbHelperMesh.setRotationFromMatrix( obbRotation )
-        scene.add( this.obbHelperMesh )
+        // scene.add( this.obbHelperMesh )
 
 
         // Create group for box

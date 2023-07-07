@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import * as TWEEN from '@tweenjs/tween.js'
 
 import { scene } from './scene';
 import { manager } from "./scene";
@@ -18,7 +17,9 @@ let goalTimers = []
 
 let score = 0
 
-const COOLDOWN_SECONDS = 2
+const SCORE_COOLDOWN_SECONDS = 2
+const DAMAGE_COOLDOWN_SECONDS = 1
+const TIME_TRIAL_LENGTH_SECONDS = 90
 
 createGoal(
     new THREE.Vector3(1, 2, 3),
@@ -66,9 +67,25 @@ const bounds = {
     z: { min: -4, max: 4}
 }
 
+const scoreDisplay = document.getElementById("score")
+
 let counter = 0
 let startUpdatingArm = false
 let damageFrames = []
+
+const timerDisplay = document.getElementById("timer")
+
+setClock( TIME_TRIAL_LENGTH_SECONDS )
+
+let timerSeconds = TIME_TRIAL_LENGTH_SECONDS
+let timeTrial = false
+let start
+
+const startButton = document.getElementById('start-button')
+const endButton = document.getElementById('end-button')
+startButton.onclick = beginTimeTrial
+endButton.onclick = endTimeTrial
+
 export function animate() {
     // wait for objects to fully load
     counter++
@@ -79,6 +96,16 @@ export function animate() {
     if( startUpdatingArm ) robotController.goToGoal()
 
     if (score < 0) score = 0
+    scoreDisplay.innerHTML = "Score: " + score
+
+    if( timeTrial ) {
+        let delta = Date.now() - start
+        let deltaSeconds = Math.floor(delta / 1000)
+        timerSeconds = TIME_TRIAL_LENGTH_SECONDS - deltaSeconds
+        if( timerSeconds <= 0 ) endTimeTrial()
+
+        setClock( timerSeconds )
+    }
 
     for(let i = 0; i < targets.length; i++) {
         const target = targets[i]
@@ -94,14 +121,14 @@ export function animate() {
         // Indicate whether arm is properly aligned
         updateTargetColors(target, armInRange, armAligned, grasping, damage )
 
-        // if(damageFrames[i] === undefined || counter - damageFrames[i] > 10) {
-        //     target.setBorderColor(TargetBox.colors.black)
-        // }
+        if(damageFrames[i] === undefined || counter - damageFrames[i] > 10) {
+            updateTargetColors(target, armInRange, armAligned, grasping, false )
+        }
 
         if(damage && !armInRange) {
-            if(damageFrames[i] === undefined || counter - damageFrames[i] > 60) {
+            if(damageFrames[i] === undefined || counter - damageFrames[i] > DAMAGE_COOLDOWN_SECONDS * 60) {
                 damageFrames[i] = counter
-                score -= 1
+                if( timeTrial ) score -= 1
                 target.setBorderColor(TargetBox.colors.magenta)
             }
         }
@@ -118,17 +145,17 @@ export function animate() {
             if(goal.borderColor !== target.color) continue
 
             // Check if box has been placed
-            if(!grasping && goalTimers[i] > COOLDOWN_SECONDS) {
+            if(!grasping && goalTimers[i] > SCORE_COOLDOWN_SECONDS) {
                 target.transform( getRandomPosition( bounds ), getRandomRotation() )
                 target.setColor( getRandomColorRGB() )
-                score += 10
+                if( timeTrial ) score += 10
             }
 
             // Update cooldown border
             if(grasping && goal.boundingBox.containsBox(target.boundingBox)) {
                 goalTimers[i] += 1/60
 
-                goal.setProgressBorderProp( goalTimers[i] / COOLDOWN_SECONDS)
+                goal.setProgressBorderProp( goalTimers[i] / SCORE_COOLDOWN_SECONDS)
                 // goal.setBorderColor( TargetBox.colors.cyan )
             } else {
                 goalTimers[i] = 0
@@ -140,7 +167,6 @@ export function animate() {
     updateRobot()
     updateControls()
     updateCamera()
-    TWEEN.update()
 
     setTimeout( function() {
 
@@ -241,4 +267,32 @@ function updateTargetColors( target, armInRange, armAligned, grasping, damage ) 
     }
 
     target.setAttachmentPointColor(attachmentPointColor)
+}
+
+
+// Handle time trial controls
+function setClock( seconds ) {
+    let tMin = Math.floor( seconds / 60 )
+    let tSec = Math.floor( seconds % 60 )
+    if( tSec < 10 ) tSec = "0" + tSec
+    let time = tMin + ":" + tSec
+    timerDisplay.innerHTML = time
+}
+
+function beginTimeTrial() {
+    endButton.style.display = "block"
+    startButton.style.display = "none"
+    scoreDisplay.style.display = "block"
+    score = 0
+    timeTrial = true
+    start = Date.now();
+}
+
+function endTimeTrial() {
+    endButton.style.display = "none"
+    startButton.style.display = "block"
+    // scoreDisplay.style.display = "none"
+    timeTrial = false
+    timerSeconds = TIME_TRIAL_LENGTH_SECONDS
+    setClock(timerSeconds)
 }
