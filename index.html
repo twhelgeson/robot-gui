@@ -47,6 +47,16 @@
 				display: none;
 			}
 
+			#gamepad-warning {
+				background: rgba(255, 255, 255, 0.5);
+				color: black;
+				width: 30%;
+				position: absolute;
+				left: 35%;
+				padding: 0.2em;
+				padding-bottom: 0.4em;
+			}
+
 			.progress-bar-container {
 				position: absolute;
 				left: 50%;
@@ -87,6 +97,8 @@
 		<div class="top-menu-item" id="timer">1:30</div>
 		<div class="top-menu-item" id="score">Score: 0</div>
 	</div>
+
+	<div class="info initial-gui" id="gamepad-warning">Please plug in your Arduino and press any button to connect</div>
 
 	<body>
 		<script type="module" src="/js/scene.js"></script>

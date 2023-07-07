@@ -35,7 +35,11 @@ export var grasping = false
 // update all controls
 export default function updateControls() {
     const gamepad = getGamepad()
-    if(!gamepad) return
+    if(!gamepad) {
+        document.getElementById("gamepad-warning").style.display = "block"
+        return
+    }
+    document.getElementById("gamepad-warning").style.display = "none"
 
     
     // handle end effector incremental controls
