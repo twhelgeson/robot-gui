@@ -9,6 +9,7 @@ import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
 import { robotInvalid } from './Robot';
 import { robotController } from './RobotEEControl';
+import { gui as controlGUI } from './gui';
 
 
 let targets = []
@@ -20,6 +21,7 @@ let score = 0
 const SCORE_COOLDOWN_SECONDS = 2
 const DAMAGE_COOLDOWN_SECONDS = 1
 const TIME_TRIAL_LENGTH_SECONDS = 90
+const TIME_TRIAL_WARN_SECONDS = 10
 
 createGoal(
     new THREE.Vector3(1, 2, 3),
@@ -91,6 +93,7 @@ export function animate() {
     counter++
     if(counter === 2) {
         progressBarContainer.style.display = 'none'
+        showGUI()
         startUpdatingArm = true
     }
     if( startUpdatingArm ) robotController.goToGoal()
@@ -277,12 +280,21 @@ function setClock( seconds ) {
     if( tSec < 10 ) tSec = "0" + tSec
     let time = tMin + ":" + tSec
     timerDisplay.innerHTML = time
+    if( seconds <= TIME_TRIAL_WARN_SECONDS ) timerDisplay.style.color = "red"
+}
+
+function showGUI() {
+    const gui = document.getElementsByClassName("initial-gui")
+    for(let i = 0; i < gui.length; i++) {
+        gui[i].style.display = "block"
+    }
+    controlGUI.show()
 }
 
 function beginTimeTrial() {
-    endButton.style.display = "block"
+    endButton.style.display = "inline"
     startButton.style.display = "none"
-    scoreDisplay.style.display = "block"
+    scoreDisplay.style.display = "inline"
     score = 0
     timeTrial = true
     start = Date.now();
@@ -290,9 +302,10 @@ function beginTimeTrial() {
 
 function endTimeTrial() {
     endButton.style.display = "none"
-    startButton.style.display = "block"
+    startButton.style.display = "inline"
     // scoreDisplay.style.display = "none"
     timeTrial = false
     timerSeconds = TIME_TRIAL_LENGTH_SECONDS
+    timerDisplay.style.color = "white"
     setClock(timerSeconds)
 }

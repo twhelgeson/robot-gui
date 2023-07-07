@@ -15,8 +15,9 @@ let layer = {
 const layerInfo = document.getElementById("layer-info")
 
 /* CREATE GUI */
-const gui = new GUI({width: 400})
+export const gui = new GUI({width: 400})
 gui.close()
+gui.hide()
 
 const layerControlFolder = gui.addFolder( "Layer Controls")
 // Create dropdown for switching layers

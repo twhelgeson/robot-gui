@@ -9,28 +9,44 @@
 				position: absolute;
 				text-align: center;
 				z-index: 100;
-				display:block;
-				color:black;
-				background:white;
+				display:none;
+				color:white;
+				background:black;
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 			}
+
+			#top-menu {
+				text-align: left;
+				padding: 0.2em;
+				left: 1em;
+				padding-right: 1em;
+			}
+
+			.top-menu-item {
+				display: inline;
+				padding: 0.1em;
+				padding-left: 1.2em;
+			}
+
 			#layer-info {
 				bottom: 0;
 				left: 1em;
+				padding: 0.2em;
+				padding-bottom: 0.4em;
 			}
+
 			#score {
-				left: 11em;
 				display: none;
 			}
-			#timer {
-				left: 8em;
-			}
+
 			button {
-				width: 9em;
+				width: 10em;
 			}
+
 			#end-button {
 				display: none;
-				z-index: 200;
 			}
+
 			.progress-bar-container {
 				position: absolute;
 				left: 50%;
@@ -54,6 +70,7 @@
 			label {
 				color: white;
 				font-size: 2rem;
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 			}
 		</style>
 	</head>
@@ -61,11 +78,16 @@
 		<label for="progress-bar" id="progress-bar-label">Loading...</label>
 		<progress id="progress-bar" value="0" max="100"> </progress>
 	</div>
-	<div class="info" id="layer-info">Layer 1</div>
-	<div class="info" id="score">Score: 0</div>
-	<div class="info" id="timer">1:30</div>
-	<button class="info" id="start-button">Begin Time Trial</button>
-	<button class="info" id="end-button">End Time Trial</button>
+
+	<div class="info initial-gui" id="layer-info">Layer 1</div>
+
+	<div class="info initial-gui" id="top-menu">
+		<div class="top-menu-item" id="start-button"><button>Begin Time Trial</button></div>
+		<div class="top-menu-item" id="end-button"><button>End Time Trial</button></div>
+		<div class="top-menu-item" id="timer">1:30</div>
+		<div class="top-menu-item" id="score">Score: 0</div>
+	</div>
+
 	<body>
 		<script type="module" src="/js/scene.js"></script>
 		<script type="module" src="/js/camera.js"></script>
