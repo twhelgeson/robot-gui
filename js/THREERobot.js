@@ -186,11 +186,11 @@ export default class THREERobot {
     }
   }
 
-  intersecting(boundingBox) {
+  intersectingArm(bound) {
     let inter = false
     for(let i = 0; i < this.robotBasicMeshes.length; i++) {
       const mesh = this.robotBasicMeshes[i]
-      if(mesh.userData.obb.intersectsBox3(boundingBox)) inter = true
+      if(this.#intersectingOBB( mesh.userData.obb, bound)) inter = true
     }
     return inter
   }
@@ -198,12 +198,20 @@ export default class THREERobot {
   intersectingEE(bound) {
     const mesh = this.robotBasicMeshes[5]
 
-    if(bound.constructor.name === "Box3") {
-      return mesh.userData.obb.intersectsBox3(bound)
-    } else {
-      return mesh.userData.obb.intersectsSphere(bound)
+    return this.#intersectingOBB( mesh.userData.obb, bound )
+  }
+
+  #intersectingOBB( obb, bound ) {
+    switch( bound.constructor.name ) {
+      case "Box3":
+        return obb.intersectsBox3(bound)
+      case "Sphere":
+        return obb.intersectsSphere(bound)
+      case "OBB": 
+        return obb.intersectsOBB(bound)
+      default:
+        console.error( "Invalid bounding box.")
     }
-    
   }
 
   _colorObjectAndChildren(object, hexColor) {

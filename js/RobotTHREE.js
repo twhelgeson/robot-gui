@@ -81,7 +81,7 @@ export function updateRobot() {
 }
 
 export function robotIntersecting(boundingBox) {
-  return VisualRobot.intersecting(boundingBox)
+  return VisualRobot.intersectingArm(boundingBox)
 }
 
 export function robotEEIntersecting(boundingBox) {

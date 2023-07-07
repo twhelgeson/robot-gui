@@ -4,7 +4,7 @@ import * as TWEEN from '@tweenjs/tween.js'
 import { scene } from './scene';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
-import { robotEEIntersecting, robotStore, updateRobot } from "./RobotTHREE";
+import { robotEEIntersecting, robotIntersecting, robotStore, updateRobot } from "./RobotTHREE";
 import updateControls, { grasping } from "./gamepad";
 import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
@@ -15,6 +15,8 @@ import { robotController } from './RobotEEControl';
 let targets = []
 let goals = []
 let goalTimers = []
+
+let score = 0
 
 const COOLDOWN_SECONDS = 2
 
@@ -40,7 +42,7 @@ createGoal(
 )
 
 createTarget(
-    new THREE.Vector3(0, 5, 1),
+    new THREE.Vector3(2, 5, 1),
     new THREE.Vector3(0, 0, 0),
     TargetBox.colors.green
 )
@@ -66,17 +68,22 @@ const bounds = {
 
 let counter = 0
 let startUpdatingArm = false
+let damageFrames = []
 export function animate() {
     // wait for objects to fully load
-    if(counter < 3) counter++
+    counter++
     if(counter === 2) {
         progressBarContainer.style.display = 'none'
         startUpdatingArm = true
     }
-
     if( startUpdatingArm ) robotController.goToGoal()
 
-    for(const target of targets) {
+    if (score < 0) score = 0
+
+    for(let i = 0; i < targets.length; i++) {
+        const target = targets[i]
+        const damage = robotIntersecting( target.mesh.userData.obb )
+
         // arm end effector is touching attachment point
         const armInRange = robotEEIntersecting( target.attachmentPointBound )
             
@@ -85,7 +92,19 @@ export function animate() {
         const armAligned = Math.abs( armTargetDot + 1 ) < 0.02
 
         // Indicate whether arm is properly aligned
-        updateTargetColors(target, armInRange, armAligned, grasping )
+        updateTargetColors(target, armInRange, armAligned, grasping, damage )
+
+        // if(damageFrames[i] === undefined || counter - damageFrames[i] > 10) {
+        //     target.setBorderColor(TargetBox.colors.black)
+        // }
+
+        if(damage && !armInRange) {
+            if(damageFrames[i] === undefined || counter - damageFrames[i] > 60) {
+                damageFrames[i] = counter
+                score -= 1
+                target.setBorderColor(TargetBox.colors.magenta)
+            }
+        }
 
         if( armInRange && armAligned && grasping ) {
             const robotTarget = robotStore.getState().target
@@ -102,6 +121,7 @@ export function animate() {
             if(!grasping && goalTimers[i] > COOLDOWN_SECONDS) {
                 target.transform( getRandomPosition( bounds ), getRandomRotation() )
                 target.setColor( getRandomColorRGB() )
+                score += 10
             }
 
             // Update cooldown border
@@ -204,7 +224,7 @@ function createGoal( position, rotation, color, progressColor ) {
 
 // Handle target interactions
 
-function updateTargetColors( target, armInRange, armAligned, grasping ) {
+function updateTargetColors( target, armInRange, armAligned, grasping, damage ) {
 
     // Handle attachment point colors
     let attachmentPointColor = TargetBox.colors.orange
@@ -214,6 +234,8 @@ function updateTargetColors( target, armInRange, armAligned, grasping ) {
     if(armInRange && armAligned) {
         if(grasping) attachmentPointColor = TargetBox.colors.black
         target.setBorderColor( TargetBox.colors.cyan )
+    } else if (damage) {
+        target.setBorderColor( TargetBox.colors.magenta )
     } else {
         target.setBorderColor( TargetBox.colors.black )
     }

@@ -19,7 +19,7 @@ export class RobotController {
         this.rotStep = rotStep
         this.transStep = transStep
 
-        this.positionGoal = { x: 0, y: 5, z: 1 }
+        this.positionGoal = { x: 0, y: 7, z: 1 }
         this.rotationGoal = { x: -Math.PI, y: 0, z: 0 }
         this.angleGoal = { A0: Math.PI / 2, A1: 0, A2: 0, A3: 0, A4: 0, A5: 0 }
 

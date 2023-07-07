@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {MeshLine, MeshLineGeometry, MeshLineMaterial} from '@lume/three-meshline'
+import { OBB } from 'three/examples/jsm/math/OBB'
 
 export class TargetBox {
     static colors = {
@@ -9,7 +10,8 @@ export class TargetBox {
         cyan: 0x00ffff,
         yellow: 0xffff00,
         orange: 0xff8800,
-        black: 0x000000
+        black: 0x000000,
+        magenta: 0xff00ff
     }
 
     static upVector = new THREE.Vector3( 0, 0, 1 )
@@ -20,6 +22,7 @@ export class TargetBox {
 
         this.color = color
         this.borderColor = color
+        this.scale = scale
 
         // Group to hold each part of the box
         this.box = new THREE.Group()
@@ -27,8 +30,29 @@ export class TargetBox {
         // Create box
         this.geometry = new THREE.BoxGeometry( scale.x, scale.y, scale.z )
         this.material = new THREE.MeshBasicMaterial( { color: color} )
+        this.geometry.translate( 0, 0, -(scale.z/2))
+        this.geometry.userData.obb = new OBB()
+        this.geometry.userData.obb.halfSize.copy( scale ).multiplyScalar( 0.5 )
+        this.geometry.userData.obb.center.set( 0, 0, -(scale.z/2) )
+        
         this.mesh = new THREE.Mesh( this.geometry, this.material )
-        this.mesh.geometry.translate( 0, 0, -(scale.z/2))
+        this.mesh.userData.obb = new OBB()
+        this.mesh.userData.obb.copy( this.mesh.geometry.userData.obb )
+        this.mesh.userData.obb.applyMatrix4( this.mesh.matrixWorld )
+
+        // Create OBB helper
+        const obbSize = this.mesh.userData.obb.halfSize.multiplyScalar( 2 )
+        const obbGeometry = new THREE.BoxGeometry( obbSize.x, obbSize.y, obbSize.z )
+        const obbMaterial = new THREE.MeshBasicMaterial( {color: TargetBox.colors.yellow, wireframe: true })
+        this.obbHelperMesh = new THREE.Mesh( obbGeometry, obbMaterial )
+        // const obbRotation = new THREE.Matrix4().makeRotationZ( (Math.PI) / 2 )
+        // this.mesh.userData.obb.rotation.setFromMatrix4( obbRotation )
+        this.obbHelperMesh.position.copy( this.mesh.userData.obb.center )
+        // this.obbHelperMesh.setRotationFromMatrix( obbRotation )
+        scene.add( this.obbHelperMesh )
+
+
+        // Create group for box
         this.box.add(this.mesh)
         this.scene = scene
 
@@ -99,6 +123,7 @@ export class TargetBox {
 
         // Used to track the previous rotation when attached to arm
         this.previousRotation
+
     }
 
     setColor( color ) {
@@ -132,10 +157,26 @@ export class TargetBox {
         this.attachmentPointBound.copy( this.attachmentPoint.geometry.boundingSphere )
             .applyMatrix4( this.attachmentPoint.matrixWorld )
 
-        
+        // Update orientation vector
         this.orientation.copy( TargetBox.upVector ).applyQuaternion( this.box.quaternion )
         this.orientation.normalize()
         this.arrowHelper.setDirection( this.orientation )
+
+        // Update OBB
+        const obbPosition = new THREE.Vector3().setFromMatrixPosition( this.mesh.matrixWorld )
+        obbPosition.x -= this.orientation.x * this.scale.z / 2
+        obbPosition.y -= this.orientation.y * this.scale.z / 2
+        obbPosition.z -= this.orientation.z * this.scale.z / 2
+        const obbRotation4 = new THREE.Matrix4().extractRotation( this.mesh.matrixWorld )
+
+        this.mesh.userData.obb.copy( this.mesh.geometry.userData.obb )
+        this.mesh.userData.obb.rotation.setFromMatrix4( obbRotation4 )
+        this.mesh.userData.obb.center.copy( obbPosition )
+
+                                // .applyMatrix4( this.mesh.matrixWorld )
+        this.obbHelperMesh.position.copy( this.mesh.userData.obb.center )
+        const obbHelperRotation = new THREE.Matrix4().setFromMatrix3( this.mesh.userData.obb.rotation )
+        this.obbHelperMesh.setRotationFromMatrix( obbHelperRotation )
     }
 
     setPosition( position ) {
