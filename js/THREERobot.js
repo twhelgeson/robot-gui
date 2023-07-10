@@ -202,16 +202,10 @@ export default class THREERobot {
   }
 
   #intersectingOBB( obb, bound ) {
-    switch( bound.constructor.name ) {
-      case "Box3":
-        return obb.intersectsBox3(bound)
-      case "Sphere":
-        return obb.intersectsSphere(bound)
-      case "OBB": 
-        return obb.intersectsOBB(bound)
-      default:
-        console.error( "Invalid bounding box.")
-    }
+      if(bound instanceof THREE.Box3)  return obb.intersectsBox3(bound)
+      if(bound instanceof THREE.Sphere)  return obb.intersectsSphere(bound)
+      if(bound instanceof OBB)  return obb.intersectsOBB(bound)
+      console.error( "Invalid bounding box.")
   }
 
   _colorObjectAndChildren(object, hexColor) {
