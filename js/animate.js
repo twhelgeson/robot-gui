@@ -10,6 +10,7 @@ import { robotEEOrientation } from './RobotTHREE';
 import { robotInvalid } from './Robot';
 import { robotController } from './RobotEEControl';
 import { gui as controlGUI } from './gui';
+import goalPositions from "../config/goal_positions.json" assert { type: "json" }
 
 let targets = []
 let goals = []
@@ -52,13 +53,12 @@ createTarget(
 const progressBarContainer = document.querySelector('.progress-bar-container')
 manager.onLoad = function ( ) {
     animate()
-};
+}
 
-let attach = false
+let graspOverride = false
 window.addEventListener("keydown", (e) => {
-    if(e.shiftKey) {
-        if(attach == true) attach = false
-        else attach = true
+    if(e.key === "G") {
+        graspOverride = !graspOverride
     }
 })
 
@@ -88,6 +88,8 @@ startButton.onclick = beginTimeTrial
 endButton.onclick = endTimeTrial
 
 export function animate() {
+    if( graspOverride ) var grasping = true
+
     // wait for objects to fully load
     counter++
     if(counter === 2) {
@@ -137,7 +139,6 @@ export function animate() {
 
         if( armInRange && armAligned && grasping ) {
             const robotTarget = robotStore.getState().target
-            // console.log(robotTarget.position)
             if(!robotInvalid) target.attach( robotTarget.position, robotTarget.rotation )
         }
 
@@ -148,7 +149,8 @@ export function animate() {
 
             // Check if box has been placed
             if(!grasping && goalTimers[i] > SCORE_COOLDOWN_SECONDS) {
-                target.transform( getRandomPosition( bounds ), getRandomRotation() )
+                const goal = getRandomGoal()
+                target.transform( goal.position, goal.rotation )
                 target.setColor( getRandomColorRGB() )
                 if( timeTrial ) score += 10
             }
@@ -192,7 +194,12 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min); 
     // The maximum is exclusive and the minimum is inclusive
-  }
+}
+
+function getRandomGoal() {
+    let i = getRandomInt(0, goalPositions.length)
+    return goalPositions[i]
+}
 
 function getRandomPosition( bounds ) {
     const x = getRandomArbitrary( bounds.x.min, bounds.x.max )
