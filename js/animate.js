@@ -298,6 +298,11 @@ function showGUI() {
 }
 
 function beginTimeTrial() {
+    for(const target of targets) {
+        const goal = getRandomGoal()
+        target.transform( goal.position, goal.rotation )
+        target.setColor( getRandomColorRGB() )
+    }
     endButton.style.display = "inline"
     startButton.style.display = "none"
     scoreDisplay.style.display = "inline"
