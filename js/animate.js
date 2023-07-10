@@ -11,7 +11,6 @@ import { robotInvalid } from './Robot';
 import { robotController } from './RobotEEControl';
 import { gui as controlGUI } from './gui';
 
-
 let targets = []
 let goals = []
 let goalTimers = []
@@ -128,7 +127,7 @@ export function animate() {
             updateTargetColors(target, armInRange, armAligned, grasping, false )
         }
 
-        if(damage && !armInRange) {
+        if(damage && (!armInRange || !armAligned)) {
             if(damageFrames[i] === undefined || counter - damageFrames[i] > DAMAGE_COOLDOWN_SECONDS * 60) {
                 damageFrames[i] = counter
                 if( timeTrial ) score -= 1
