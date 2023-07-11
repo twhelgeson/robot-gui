@@ -51,7 +51,8 @@
                 "decrement joint 5 angle": "none"
             }
         },
-        "Grasp": "none"
+        "Grasp": "none",
+        "Pan Camera": "none"
     },
     "Controls Layer 2": {
         "End Effector Controls": {
@@ -104,6 +105,7 @@
                 "decrement joint 5 angle": "none"
             }
         },
-        "Grasp": "none"
+        "Grasp": "none",
+        "Pan Camera": "none"
     }
 }

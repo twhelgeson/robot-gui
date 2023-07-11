@@ -125,6 +125,8 @@ function createAxisControls() {
         editControls["Joint Controls"]["Angle Controls"],
         axisList
     )
+
+    gui.add(editControls, "Pan Camera", axisList)
 }
 
 

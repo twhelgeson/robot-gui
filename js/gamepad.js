@@ -1,11 +1,10 @@
 import { robotController } from "./RobotEEControl";
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { RotaryEncoder } from "./devices";
 import { Button } from "./devices";
 import { Axis } from "./devices"
-import { RobotController } from "./RobotController";
 import { controls, currentControls, setCurrentLayer, toggleLayer } from "./gui";
-
+import { decrementCameraAngle, incrementCameraAngle, moveCamera, moveCameraAmt, setCameraAngle } from "./camera";
+import { cameraLimits } from "./camera";
 import mapping from "../config/mapping.json" assert { type: "json" }
 import { storeManager } from "./State";
 
@@ -49,6 +48,7 @@ export default function updateControls() {
     handleAxisControls("Joint")
     handleLayerControl()
     handleGrasperControl()
+    handleCameraControl()
 }
 
 // Defines limits for end effector, used by linear potentiometers
@@ -106,6 +106,39 @@ function makeBasicDevices( deviceMappings, DeviceClass ) {
     }
 
     return devices
+}
+
+/* HANDLE CAMERA CONTROL */
+function handleCameraControl() {
+    const deviceName = currentControls["Pan Camera"]
+    if(deviceName === "none") return
+    const device = getAxis( deviceName )
+    
+    if( deviceName.includes("Potentiometer") ) handleCamPotentiometer( device )
+    else handleCamRotaryEncoder( device )
+}
+
+function handleCamPotentiometer( device ) {
+    const input = mapInput( -1, 1, -1 * device.value )
+    const output = mapOutput( cameraLimits[0], cameraLimits[1], input)
+    setCameraAngle( output )
+}
+
+let prevDirection 
+function handleCamRotaryEncoder( device ) {
+    const velocity = -1 * device.velocity
+    const direction = -1 * device.direction
+    const controlType = "camera"
+    const ID = "n/a"
+
+    if(Math.abs(velocity) < VELOCITY_THRESHOLD) {
+        incrementOnce( controlType, ID, 1, direction === 1)
+        incrementOnce( controlType, ID, -1, direction === -1)
+
+        return
+    }
+
+    moveCameraAmt( velocity / Math.PI )
 }
 
 /* HANDLE GRASPER CONTROL */
@@ -225,7 +258,7 @@ function handleAxisControl( controlType, controlName, axisName ) {
 
 // Controls an axis using a rotary encoder
 function setAxisRotaryEncoder( controlType, ID, encoder ) {
-    const velocity = encoder.velocity
+    let velocity = encoder.velocity
     const direction = encoder.direction
 
     if (Math.abs(velocity) < VELOCITY_THRESHOLD) {
@@ -395,6 +428,8 @@ function increment( controlType, ID, direction ) {
         robotController.moveAlongAxis( ID, direction )
     } else if( controlType === "end effector rotation") {
         robotController.rotateAroundAxis( ID, direction )
+    } else if( controlType === "camera") {
+        moveCamera( direction )
     } else {
         console.error("Invalid control type")
     }
