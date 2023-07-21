@@ -29,7 +29,7 @@ window.addEventListener("gamepadconnected", (e) => {
     makeDevices()
 });
 
-export var grasping = false
+export var graspControlActive = false
 
 // update all controls
 export default function updateControls() {
@@ -157,7 +157,7 @@ function handleGrasperControl() {
 }
 
 function handleGraspSwitch( device ) {
-    grasping = device.pressed
+    graspControlActive = device.pressed
 }
 
 let prevGraspButtonState
@@ -165,8 +165,8 @@ function handleGraspButton( device ) {
     if(device.pressed) {
         if(prevGraspButtonState === false || prevGraspButtonState === undefined ) {
             // Toggle grasping
-            if(grasping === false) grasping = true
-            else grasping = false
+            if(graspControlActive === false) graspControlActive = true
+            else graspControlActive = false
         }
     }
     prevGraspButtonState = device.pressed

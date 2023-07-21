@@ -4,7 +4,7 @@ import { scene } from './scene';
 import { manager } from "./scene";
 import { updateCamera } from "./camera";
 import { robotEEIntersecting, robotIntersecting, robotStore, updateRobot } from "./RobotTHREE";
-import updateControls, { grasping } from "./gamepad";
+import updateControls, { graspControlActive } from "./gamepad";
 import { TargetBox } from "./targetBox";
 import { robotEEOrientation } from './RobotTHREE';
 import { robotInvalid } from './Robot';
@@ -55,7 +55,7 @@ manager.onLoad = function ( ) {
     animate()
 }
 
-let graspOverride = false
+var graspOverride = false
 window.addEventListener("keydown", (e) => {
     if(e.key === "G") {
         graspOverride = !graspOverride
@@ -88,7 +88,8 @@ startButton.onclick = beginTimeTrial
 endButton.onclick = endTimeTrial
 
 export function animate() {
-    if( graspOverride ) var grasping = true
+    var grasping = graspControlActive
+    if( graspOverride ) grasping = true
 
     // wait for objects to fully load
     counter++
