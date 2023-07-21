@@ -20,8 +20,8 @@ let score = 0
 
 const SCORE_COOLDOWN_SECONDS = 2
 const DAMAGE_COOLDOWN_SECONDS = 1
-const TIME_TRIAL_LENGTH_SECONDS = 90
-const TIME_TRIAL_WARN_SECONDS = 10
+const TIME_TRIAL_LENGTH_SECONDS = 180
+const TIME_TRIAL_WARN_SECONDS = 30
 
 createGoal(
     new THREE.Vector3(1, 2, 3),
@@ -100,7 +100,7 @@ export function animate() {
     }
     if( startUpdatingArm ) robotController.goToGoal()
 
-    if (score < 0) score = 0
+    // if (score < 0) score = 0
     scoreDisplay.innerHTML = "Score: " + score
 
     if( timeTrial ) {
