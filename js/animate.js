@@ -11,6 +11,7 @@ import { robotInvalid } from './Robot';
 import { robotController } from './RobotEEControl';
 import { gui as controlGUI } from './gui';
 import goalPositions from "../config/goal_positions.json" assert { type: "json" }
+import colors from '../config/colors';
 
 let targets = []
 let goals = []
@@ -26,28 +27,28 @@ const TIME_TRIAL_WARN_SECONDS = 30
 createGoal(
     new THREE.Vector3(1, 2, 3),
     new THREE.Vector3(0, 0, 0),
-    TargetBox.colors.green,
-    new THREE.Color("darkgreen")
+    colors.goals.goal_1.default,
+    colors.goals.goal_1.darkened
 )
 
 createGoal(
     new THREE.Vector3(4, 2, 3),
     new THREE.Vector3(0, 0, 0),
-    TargetBox.colors.red,
-    new THREE.Color("darkred")
+    colors.goals.goal_2.default,
+    colors.goals.goal_2.darkened
 )
 
 createGoal(
     new THREE.Vector3(4, 7, 3),
     new THREE.Vector3(0, 0, 0),
-    TargetBox.colors.blue,
-    new THREE.Color("cyan")
+    colors.goals.goal_3.default,
+    colors.goals.goal_3.darkened
 )
 
 createTarget(
     new THREE.Vector3(2, 5, 1),
     new THREE.Vector3(0, 0, 0),
-    TargetBox.colors.green
+    colors.goals.goal_1.default
 )
 
 const progressBarContainer = document.querySelector('.progress-bar-container')
@@ -61,12 +62,6 @@ window.addEventListener("keydown", (e) => {
         graspOverride = !graspOverride
     }
 })
-
-const bounds = {
-    x: { min: -4, max: 4},
-    y: { min: 3, max: 4},
-    z: { min: -4, max: 4}
-}
 
 const scoreDisplay = document.getElementById("score")
 
@@ -134,7 +129,7 @@ export function animate() {
             if(damageFrames[i] === undefined || counter - damageFrames[i] > DAMAGE_COOLDOWN_SECONDS * 60) {
                 damageFrames[i] = counter
                 if( timeTrial ) score -= 1
-                target.setBorderColor(TargetBox.colors.magenta)
+                target.setBorderColor( colors.target.border.damage )
             }
         }
 
@@ -161,7 +156,6 @@ export function animate() {
                 goalTimers[i] += 1/60
 
                 goal.setProgressBorderProp( goalTimers[i] / SCORE_COOLDOWN_SECONDS)
-                // goal.setBorderColor( TargetBox.colors.cyan )
             } else {
                 goalTimers[i] = 0
                 goal.setProgressBorderProp(0)
@@ -219,19 +213,11 @@ function getRandomRotation() {
 }
 
 function getRandomColorRGB() {
+    const goalNames = Object.keys(colors.goals)
     const int = getRandomInt(0, 3)
+    const goalName = goalNames[ int ]
 
-    switch(int) {
-        case 0:
-            return TargetBox.colors.red
-        case 1:
-            return TargetBox.colors.green
-        case 2:
-            return TargetBox.colors.blue
-        default:
-            return TargetBox.colors.red
-    }
-    
+    return colors.goals[ goalName ].default
 }
 
 
@@ -239,7 +225,7 @@ function getRandomColorRGB() {
 
 function createTarget( position, rotation, color ) {
     const target = new TargetBox(position, rotation, scene)
-    target.setBorderColor( TargetBox.colors.black )
+    target.setBorderColor( colors.target.border.default )
     target.setColor( color )
 
     targets.push( target )
@@ -252,7 +238,7 @@ function createGoal( position, rotation, color, progressColor ) {
     goal.hideAttachmentPoint()
     goal.addProgressBorder()
     goal.setProgressBorderProp( 0 )
-    goal.progressBorder.material.color = progressColor
+    goal.progressBorder.material.color = new THREE.Color( progressColor )
 
     goals.push(goal)
     goalTimers.push(0)
@@ -263,17 +249,17 @@ function createGoal( position, rotation, color, progressColor ) {
 function updateTargetColors( target, armInRange, armAligned, grasping, damage ) {
 
     // Handle attachment point colors
-    let attachmentPointColor = TargetBox.colors.orange
-    if(armAligned) attachmentPointColor = TargetBox.colors.cyan
+    let attachmentPointColor = colors.target.attachment_point.default
+    if(armAligned) attachmentPointColor = colors.target.attachment_point.aligned
 
     // Handle border of target
     if(armInRange && armAligned) {
-        if(grasping) attachmentPointColor = TargetBox.colors.black
-        target.setBorderColor( TargetBox.colors.cyan )
+        if(grasping) attachmentPointColor = colors.target.attachment_point.attached
+        target.setBorderColor( colors.target.border.ready_to_attach )
     } else if (damage) {
-        target.setBorderColor( TargetBox.colors.magenta )
+        target.setBorderColor( colors.target.border.damage )
     } else {
-        target.setBorderColor( TargetBox.colors.black )
+        target.setBorderColor( colors.target.border.default )
     }
 
     target.setAttachmentPointColor(attachmentPointColor)

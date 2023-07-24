@@ -49,7 +49,7 @@ const views = [
         left: 0,
         bottom: 0.5,
         width: 0.5,
-        height: 0.5,
+        height: 0.51,
         eye: [ 0, 11, 0 ],
         lookAt: [0, 12, 0],
         up: [ 0, 0, 1 ],

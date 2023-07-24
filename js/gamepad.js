@@ -31,14 +31,32 @@ window.addEventListener("gamepadconnected", (e) => {
 
 export var graspControlActive = false
 
+let counter = 0
+let notif_frame = -1
+
 // update all controls
 export default function updateControls() {
+    counter++
+
+    const gamepad_notif = document.getElementById("gamepad-connected")
+    gamepad_notif.style.display = "none"
+    document.getElementById("gamepad-warning").style.display = "block"
+
+    // Try to get gamepad
     const gamepad = getGamepad()
     if(!gamepad) {
-        document.getElementById("gamepad-warning").style.display = "block"
+        notif_frame = -1
         return
     }
+
     document.getElementById("gamepad-warning").style.display = "none"
+    gamepad_notif.innerHTML = '"' + gamepad.id + '"' + " connected."
+    gamepad_notif.style.display = "block"
+    if(notif_frame === -1 ) notif_frame = counter
+
+    if( counter - notif_frame > 60 ) {
+        gamepad_notif.style.display = "none"
+    }
 
     
     // handle end effector incremental controls

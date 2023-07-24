@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {MeshLine, MeshLineGeometry, MeshLineMaterial} from '@lume/three-meshline'
 import { OBB } from 'three/examples/jsm/math/OBB'
+import colors from '../config/colors';
 
 export class TargetBox {
     static colors = {
@@ -18,7 +19,7 @@ export class TargetBox {
 
     constructor( position, rotation, scene, 
                  scale = {x: 1, y: 1, z: 1}, 
-                 color = TargetBox.colors.blue ) {
+                 color = colors.goals.goal_1.default ) {
 
         this.color = color
         this.borderColor = color
@@ -43,7 +44,7 @@ export class TargetBox {
         // Create OBB helper
         const obbSize = this.mesh.userData.obb.halfSize.multiplyScalar( 2 )
         const obbGeometry = new THREE.BoxGeometry( obbSize.x, obbSize.y, obbSize.z )
-        const obbMaterial = new THREE.MeshBasicMaterial( {color: TargetBox.colors.yellow, wireframe: true })
+        const obbMaterial = new THREE.MeshBasicMaterial( {color: 0xff00ff, wireframe: true })
         this.obbHelperMesh = new THREE.Mesh( obbGeometry, obbMaterial )
         this.obbHelperMesh.position.copy( this.mesh.userData.obb.center )
         // scene.add( this.obbHelperMesh )
@@ -111,7 +112,7 @@ export class TargetBox {
         const origin = new THREE.Vector3( 0, 0, 0 )
         const length = 1
 
-        this.arrowHelper = new THREE.ArrowHelper( this.orientation, origin, length, TargetBox.colors.yellow )
+        this.arrowHelper = new THREE.ArrowHelper( this.orientation, origin, length, 0xff00ff )
         // this.scene.add( this.arrowHelper )
         
         // Position in scene
