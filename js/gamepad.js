@@ -1,40 +1,45 @@
-import { robotController } from "./RobotEEControl";
-import { RotaryEncoder } from "./devices";
-import { Button } from "./devices";
+import { robotController } from "./RobotEEControl"
+import { RotaryEncoder } from "./devices"
+import { Button } from "./devices"
 import { Axis } from "./devices"
-import { controls, currentControls, setCurrentLayer, toggleLayer } from "./gui";
-import { decrementCameraAngle, incrementCameraAngle, moveCamera, moveCameraAmt, setCameraAngle } from "./camera";
-import { cameraLimits } from "./camera";
+import { controls, currentControls, setCurrentLayer, toggleLayer } from "./gui"
+import { decrementCameraAngle, incrementCameraAngle, moveCamera, moveCameraAmt, setCameraAngle } from "./camera"
+import { cameraLimits } from "./camera"
 import mapping from "../config/mapping.json" assert { type: "json" }
-import { storeManager } from "./State";
+import { storeManager } from "./State"
 
 
-// Store devices, can't be initialized until gamepad connected
+// Store devices
+// can't be initialized until gamepad connected
 const devices = {}
 
 // Add listener for gamepad to be connected
-var GAMEPAD_INDEX;
-var VELOCITY_THRESHOLD = 0.03;
+var GAMEPAD_INDEX
+var VELOCITY_THRESHOLD = 0.03
 window.addEventListener("gamepadconnected", (e) => {
-    const gp = navigator.getGamepads()[e.gamepad.index];
+    const gp = navigator.getGamepads()[e.gamepad.index]
     console.log(
       "Gamepad connected at index %d: %s. %d buttons, %d axes.",
       gp.index,
       gp.id,
       gp.buttons.length,
       gp.axes.length
-    );
+    )
 
     GAMEPAD_INDEX = gp.index
     makeDevices()
-});
+})
 
+// Expose when grasp is active
 export var graspControlActive = false
 
+// Count frames for controller notification
 let counter = 0
 let notif_frame = -1
 
-// update all controls
+
+/* MAIN CONTROL UPDATE */
+
 export default function updateControls() {
     counter++
 
@@ -49,6 +54,7 @@ export default function updateControls() {
         return
     }
 
+    // Handle gamepad notifications
     document.getElementById("gamepad-warning").style.display = "none"
     gamepad_notif.innerHTML = '"' + gamepad.id + '"' + " connected."
     gamepad_notif.style.display = "block"
@@ -57,7 +63,6 @@ export default function updateControls() {
     if( counter - notif_frame > 60 ) {
         gamepad_notif.style.display = "none"
     }
-
     
     // handle end effector incremental controls
     handleIncrementalControls("End Effector")
@@ -82,6 +87,7 @@ const eeLimits = {
         z: [ -(Math.PI), Math.PI ]
     }
 }
+
 
 /* CREATE DEVICES */
 
@@ -114,6 +120,7 @@ function makeRotaryEncoders() {
     return rotaryEncoders
 }
 
+// basic devices are buttons, switches, and potentiometers
 function makeBasicDevices( deviceMappings, DeviceClass ) {
     const devices = {}
 
@@ -126,7 +133,9 @@ function makeBasicDevices( deviceMappings, DeviceClass ) {
     return devices
 }
 
+
 /* HANDLE CAMERA CONTROL */
+
 function handleCameraControl() {
     const deviceName = currentControls["Pan Camera"]
     if(deviceName === "none") return
@@ -159,6 +168,7 @@ function handleCamRotaryEncoder( device ) {
     moveCameraAmt( velocity / Math.PI )
 }
 
+
 /* HANDLE GRASPER CONTROL */
 
 function handleGrasperControl() {
@@ -190,7 +200,9 @@ function handleGraspButton( device ) {
     prevGraspButtonState = device.pressed
 }
 
+
 /* HANDLE LAYER CONTROL */
+
 function handleLayerControl() {
     const controlName = controls["Layer Toggle"]
     if( controlName === "none" ) return
@@ -337,6 +349,7 @@ function mapInput( min, max, input ) {
     return (input - min) / diff
 }
 
+// Handle incremental controls
 function incrementAmt ( controlType, ID, amt ) {
     if( controlType === "joint" ) {
         robotController.moveJointAmt( ID, amt )
@@ -348,7 +361,6 @@ function incrementAmt ( controlType, ID, amt ) {
         console.error("Invalid control type")
     }
 }
-
 
 
 /* HANDLE CONTROLS INCREMENTAL */
@@ -391,7 +403,8 @@ function handleStepSize( mode, newStep ) {
 
 
 }
- 
+
+// Store incremental controls so they can be issued only once per button press
 const incrementalControlStates = {}
 
 function handleIncrementalControl( controlType, controlName, buttonName ) {
@@ -455,20 +468,6 @@ function increment( controlType, ID, direction ) {
 
 
 /* HELPER FUNCTIONS */
-
-function buttonPressed(b) {
-    if (typeof b === "object") {
-        return b.pressed;
-    }
-    return b === 1.0;
-}
-
-function updateEE( tVel, rVel ) {
-    for(let axis in tVel) {
-        robotController.moveAlongAxisAmt( axis, tVel[axis] )
-        robotController.rotateAroundAxis( axis, rVel[axis] )
-    }
-}
 
 function getButton( buttonName ) {
     if( buttonName.includes( "Rotary Encoder" )) {

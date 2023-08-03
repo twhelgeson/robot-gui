@@ -1,29 +1,34 @@
 import * as THREE from 'three'
 
-import { scene } from './scene';
-import { manager } from "./scene";
-import { updateCamera } from "./camera";
-import { robotEEIntersecting, robotIntersecting, robotStore, updateRobot } from "./RobotTHREE";
-import updateControls, { graspControlActive } from "./gamepad";
-import { TargetBox } from "./targetBox";
-import { robotEEOrientation } from './RobotTHREE';
-import { robotInvalid } from './Robot';
-import { robotController } from './RobotEEControl';
-import { gui as controlGUI } from './gui';
+import { scene } from './scene'
+import { manager } from "./scene"
+import { updateCamera } from "./camera"
+import { robotEEIntersecting, robotIntersecting, robotStore, updateRobot } from "./RobotTHREE"
+import updateControls, { graspControlActive } from "./gamepad"
+import { TargetBox } from "./targetBox"
+import { robotEEOrientation } from './RobotTHREE'
+import { robotInvalid } from './Robot'
+import { robotController } from './RobotEEControl'
+import { gui as controlGUI } from './gui'
+
 import goalPositions from "../config/goal_positions.json" assert { type: "json" }
-import colors from '../config/colors';
+import colors from '../config/colors'
 
-let targets = []
-let goals = []
-let goalTimers = []
-
-let score = 0
-
+// Game constants
 const SCORE_COOLDOWN_SECONDS = 2
 const DAMAGE_COOLDOWN_SECONDS = 1
 const TIME_TRIAL_LENGTH_SECONDS = 180
 const TIME_TRIAL_WARN_SECONDS = 30
 
+// Store game objects
+let targets = []
+let goals = []
+let goalTimers = []
+
+// Store user's score
+let score = 0
+
+// Create game objects
 createGoal(
     new THREE.Vector3(1, 2, 3),
     new THREE.Vector3(0, 0, 0),
@@ -51,11 +56,13 @@ createTarget(
     colors.goals.goal_1.default
 )
 
+// Start animating when loading is finished
 const progressBarContainer = document.querySelector('.progress-bar-container')
 manager.onLoad = function ( ) {
     animate()
 }
 
+// Add keyboard override for grasping
 var graspOverride = false
 window.addEventListener("keydown", (e) => {
     if(e.key === "G") {
@@ -63,26 +70,30 @@ window.addEventListener("keydown", (e) => {
     }
 })
 
+// Variables to track timing
 const scoreDisplay = document.getElementById("score")
-
 let counter = 0
 let startUpdatingArm = false
 let damageFrames = []
 
+// Setup time trial clock
 const timerDisplay = document.getElementById("timer")
-
 setClock( TIME_TRIAL_LENGTH_SECONDS )
-
 let timerSeconds = TIME_TRIAL_LENGTH_SECONDS
 let timeTrial = false
 let start
 
+// Set up time trial controls
 const startButton = document.getElementById('start-button')
 const endButton = document.getElementById('end-button')
 startButton.onclick = beginTimeTrial
 endButton.onclick = endTimeTrial
 
+
+/* ANIMATION LOOP */
+
 export function animate() {
+    // Handle keyboard override for grasping
     var grasping = graspControlActive
     if( graspOverride ) grasping = true
 
@@ -95,9 +106,10 @@ export function animate() {
     }
     if( startUpdatingArm ) robotController.goToGoal()
 
-    // if (score < 0) score = 0
+    // update score display
     scoreDisplay.innerHTML = "Score: " + score
 
+    // update time trial timer
     if( timeTrial ) {
         let delta = Date.now() - start
         let deltaSeconds = Math.floor(delta / 1000)
@@ -107,24 +119,25 @@ export function animate() {
         setClock( timerSeconds )
     }
 
+    // update each target
     for(let i = 0; i < targets.length; i++) {
         const target = targets[i]
         const damage = robotIntersecting( target.mesh.userData.obb )
 
-        // arm end effector is touching attachment point
+        // Track arm state
         const armInRange = robotEEIntersecting( target.attachmentPointBound )
-            
-        // arm angle is aligned with target
         const armTargetDot = robotEEOrientation.dot( target.orientation )
         const armAligned = Math.abs( armTargetDot + 1 ) < 0.02
 
-        // Indicate whether arm is properly aligned
+        // Indicate arm state
         updateTargetColors(target, armInRange, armAligned, grasping, damage )
 
+        // Make damage display flash
         if(damageFrames[i] === undefined || counter - damageFrames[i] > 10) {
             updateTargetColors(target, armInRange, armAligned, grasping, false )
         }
 
+        // Handle damage to target, update score
         if(damage && (!armInRange || !armAligned)) {
             if(damageFrames[i] === undefined || counter - damageFrames[i] > DAMAGE_COOLDOWN_SECONDS * 60) {
                 damageFrames[i] = counter
@@ -133,14 +146,16 @@ export function animate() {
             }
         }
 
+        // Handle arm grasping target
         if( armInRange && armAligned && grasping ) {
             const robotTarget = robotStore.getState().target
             if(!robotInvalid) target.attach( robotTarget.position, robotTarget.rotation )
         }
 
+        // Handle each goal
         for(let i = 0; i < goals.length; i++) {
             const goal = goals[i]
-            // Make sure colors are proper
+            // Make sure target color matches goal color
             if(goal.borderColor !== target.color) continue
 
             // Check if box has been placed
@@ -151,7 +166,7 @@ export function animate() {
                 if( timeTrial ) score += 10
             }
 
-            // Update cooldown border
+            // Update cooldown border if target is in goal
             if(grasping && goal.boundingBox.containsBox(target.boundingBox)) {
                 goalTimers[i] += 1/60
 
@@ -163,30 +178,30 @@ export function animate() {
         }
     }
 
+    // Call other update functions
     updateRobot()
     updateControls()
     updateCamera()
 
+    // Animate at 60 frames per second
     setTimeout( function() {
 
-        requestAnimationFrame( animate );
+        requestAnimationFrame( animate )
 
-    }, 1000 / 60 );
-};
-
-
+    }, 1000 / 60 )
+}
 
 
 /* HELPER FUNCTIONS */
 
 // Randomization
 function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
+    return Math.random() * (max - min) + min
 }
 
 function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
+    min = Math.ceil(min)
+    max = Math.floor(max)
     return Math.floor(Math.random() * (max - min) + min); 
     // The maximum is exclusive and the minimum is inclusive
 }
@@ -194,22 +209,6 @@ function getRandomInt(min, max) {
 function getRandomGoal() {
     let i = getRandomInt(0, goalPositions.length)
     return goalPositions[i]
-}
-
-function getRandomPosition( bounds ) {
-    const x = getRandomArbitrary( bounds.x.min, bounds.x.max )
-    const y = getRandomArbitrary( bounds.y.min, bounds.y.max )
-    const z = getRandomArbitrary( bounds.z.min, bounds.z.max )
-
-    return new THREE.Vector3( x, y, z )
-}
-
-function getRandomRotation() {
-    const x = getRandomArbitrary(-Math.PI, Math.PI)
-    const y = getRandomArbitrary(-Math.PI, Math.PI)
-    const z = getRandomArbitrary(-Math.PI, Math.PI)
-
-    return { x: x, y: y, z: z }
 }
 
 function getRandomColorRGB() {
@@ -220,9 +219,7 @@ function getRandomColorRGB() {
     return colors.goals[ goalName ].default
 }
 
-
-// Creating targets/goals
-
+// Functions for creating game objects
 function createTarget( position, rotation, color ) {
     const target = new TargetBox(position, rotation, scene)
     target.setBorderColor( colors.target.border.default )
@@ -245,7 +242,6 @@ function createGoal( position, rotation, color, progressColor ) {
 }
 
 // Handle target interactions
-
 function updateTargetColors( target, armInRange, armAligned, grasping, damage ) {
 
     // Handle attachment point colors
@@ -295,7 +291,7 @@ function beginTimeTrial() {
     scoreDisplay.style.display = "inline"
     score = 0
     timeTrial = true
-    start = Date.now();
+    start = Date.now()
     controlGUI.hide()
 }
 

@@ -63,9 +63,9 @@ export class Button extends Device {
 
     static ButtonPressed(b) {
         if (typeof b === "object") {
-          return b.pressed;
+          return b.pressed
         }
-        return b === 1.0;
+        return b === 1.0
     }
 }
 
@@ -78,6 +78,7 @@ export class Axis extends Device {
     }
 
     get value() {
+        // take 20 sample moving average of value to smooth output
         const current_value = this.gamepad.axes[this._axisIndex]
         this._values.push( current_value )
         if(this._values.length > 20) this._values.shift()

@@ -1,12 +1,14 @@
 import initialControls from "../config/controls.json" assert { type: "json" }
 import mapping from "../config/mapping.json" assert { type: "json" }
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 
-// Make a deep copy of the control config so we can reset controls later
-export var controls = JSON.parse(JSON.stringify(initialControls));
+
+// Make a deep copy of each control config so we can reset them later
+export var controls = JSON.parse(JSON.stringify(initialControls))
 var editControls = JSON.parse(JSON.stringify(controls[ "Controls Layer 1" ]))
 export var currentControls = JSON.parse(JSON.stringify(controls[ "Controls Layer 1" ]))
 
+// Track layer state
 let layer = {
     current: 1,
     edit: 1
@@ -14,13 +16,15 @@ let layer = {
 
 const layerInfo = document.getElementById("layer-info")
 
+
 /* CREATE GUI */
+
 export const gui = new GUI({width: 400})
 gui.close()
 gui.hide()
 
+// layer controls
 const layerControlFolder = gui.addFolder( "Layer Controls")
-// Create dropdown for switching layers
 const layerDropdown = layerControlFolder.add( layer, "edit", {"Layer 1": 1, "Layer 2": 2}).name("Edit Layer")
 layerDropdown.onChange(function () {
     setEditLayer( layer.edit )
@@ -73,7 +77,6 @@ gui.onChange(event => {
 })
 
 
-
 /* GUI CREATION FUNCTIONS */
 
 function createControls() {
@@ -88,7 +91,6 @@ function createControls() {
 
 // Create all the incremental controls
 function createIncrementalControls() {
-    // Get list of buttons, add option for no assignment
     const buttonList = getButtonNames( mapping )
     buttonList.unshift("none")
 
@@ -108,7 +110,6 @@ function createIncrementalControls() {
 }
 
 function createAxisControls() {
-    // Get list of axes, add option for no assignment
     const axisList = getAxisNames( mapping )    
     axisList.unshift("none")
 
@@ -150,18 +151,11 @@ function addFolders( object, gui ){
     return folders
 }
 
-// Returns the names of all buttons, including rotary encoder buttons
+// Functions to get device names
 function getButtonNames( mapping ) {
     let buttonNames = Object.keys(mapping["Buttons"])
 
     for(let rotaryEncoderName in mapping["Rotary Encoders"]) {
-        const rotaryEncoderMapping = mapping["Rotary Encoders"][rotaryEncoderName]
-
-        // for(let buttonName in rotaryEncoderMapping["Buttons"]) {
-        //     const name = rotaryEncoderName + " " + buttonName
-        //     buttonNames.push(name)
-        // }
-
         const name = rotaryEncoderName + " button"
         buttonNames.push(name)
     }
@@ -200,14 +194,14 @@ function addControlsToGUI( guiFolder, controls, deviceNames ) {
     }
 }
 
-// Download the given json object
+// Download the controls
 function downloadControlsConfig() {
     const filename = "controls.json"
     const jsonStr = JSON.stringify(controls)
 
     // Code to download file automatically
     // Source: https://stackoverflow.com/a/30800715
-    let element = document.createElement('a');
+    let element = document.createElement('a')
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr))
     element.setAttribute('download', filename)
 
@@ -222,16 +216,16 @@ function downloadControlsConfig() {
 // Prompt user to upload a controls config and set the controls to it
 function uploadControlsConfig() {
     // Source: https://stackoverflow.com/a/40971885
-    var input = document.createElement('input');
-    input.type = 'file';
+    var input = document.createElement('input')
+    input.type = 'file'
 
     input.onchange = e => { 
         // getting a hold of the file reference
         var file = e.target.files[0]; 
 
         // setting up the reader
-        var reader = new FileReader();
-        reader.readAsText(file,'UTF-8');
+        var reader = new FileReader()
+        reader.readAsText(file,'UTF-8')
 
         // here we tell the reader what to do when it's done reading...
         reader.onload = readerEvent => {
@@ -243,8 +237,11 @@ function uploadControlsConfig() {
         }
     }
 
-    input.click();
+    input.click()
 }
+
+
+// Function to manage all the controls
 
 function resetControls() {
     updateControls( controls, initialControls )

@@ -1,6 +1,6 @@
 import { robotInvalid } from "./Robot"
 
-// units per frame
+// THREE.js coordinate units per frame
 const MAX_TRANS_VEL = 0.16 
 const MAX_ROT_VEL = 0.1
 
@@ -93,12 +93,10 @@ export class RobotController {
     // runs periodically to move robot to goal state
     goToGoal() {
         this.calcAtGoals()
-        const goals = [ this.atAngleGoal, this.atPositionGoal, this.atRotationGoal ]
-        // console.log(goals)
 
         if(!this.atPositionGoal || !this.atRotationGoal) {
-            this.tweenEndEffector( this.eeRotation, this.rotationGoal, MAX_ROT_VEL, "rotation" )
-            this.tweenEndEffector( this.eePosition, this.positionGoal, MAX_TRANS_VEL, "position" )
+            this.tweenEndEffector( this.eeRotation, this.rotationGoal, MAX_ROT_VEL )
+            this.tweenEndEffector( this.eePosition, this.positionGoal, MAX_TRANS_VEL )
             this.#setRobotTarget(this.eePosition, this.eeRotation)
             Object.assign( this.angleGoal, this.angles ) 
 
@@ -120,7 +118,7 @@ export class RobotController {
         }
     }
 
-    tweenEndEffector( state, goal, max_vel, mode ) {
+    tweenEndEffector( state, goal, max_vel ) {
         let totalDiff = 0
         let diffs = { x: 0, y: 0, z: 0 }
         for( let axisName in goal ) {
@@ -146,8 +144,7 @@ export class RobotController {
 
             const increment = propVel * Math.sign( diff )
             const nextState = incrementDictVal( state, axisName, increment )
-            // const valid = checkValid( nextState )
-            /*if( valid ) */Object.assign( state, nextState )
+            Object.assign( state, nextState )
         }
     }
 
@@ -165,8 +162,7 @@ export class RobotController {
 
             const increment = max_vel * Math.sign( diff )
             const nextState = incrementDictVal( state, axisName, increment )
-            // const valid = checkValid( nextState )
-            /*if( valid ) */Object.assign( state, nextState )
+            Object.assign( state, nextState )
         }  
     }
 
@@ -200,26 +196,10 @@ export class RobotController {
     }
 }
 
-
+// Increment copy the dictionary and increment the given value
 function incrementDictVal( dict, key, amount ) {
     var dictCopy = {}
     Object.assign( dictCopy, dict )
     dictCopy[ key ] += amount
     return dictCopy
-}
-
-function setDictVal( dict, key, val ) {
-    var dictCopy = {}
-    Object.assign( dictCopy, dict )
-    dictCopy[ key ] = val
-    return dictCopy
-}
-
-function distance( point1, point2 ) {
-    const dx = point2.x - point1.x
-    const dy = point2.y - point1.y
-    const dz = point2.z - point1.z
-    const sum = Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2)
-
-    return Math.sqrt(sum)
 }

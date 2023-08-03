@@ -1,45 +1,3 @@
-import * as THREE from 'three'
-const Serial = {
-    println(text) {
-  },
-}
-
-const arrows = {}
-
-function addArrow(name, from, to, color = 0xffff00, length = 10) {
-  // if (arrows.hasOwnProperty(name)) {
-  //   window.debug.scene.remove(arrows[name])
-  // }
-  // if (!window.debug.show) return
-  // const toPoint = new THREE.Vector3(to[0], to[1], to[2])
-  // const origin = new THREE.Vector3(from[0], from[1], from[2])
-  // // length = length || toPoint.sub(origin).length()
-  // // toPoint.normalize()
-  // arrows[name] = new THREE.ArrowHelper(toPoint.sub(origin).normalize(), origin, length, color, 2, 1)
-  // window.debug.scene.add(arrows[name])
-}
-
-function addVectorArrow(name, from, vector, color, length) {
-  // addArrow(name, from, [from[0] + vector[0], from[1] + vector[1], from[2] + vector[2]], color, length)
-}
-const spheres = {}
-
-function addSphere(name, position, color = 0xffff00, diameter = 1) {
-  // if (spheres.hasOwnProperty(name)) {
-  //   window.debug.scene.remove(spheres[name])
-  // }
-  // if (!window.debug.show) return
-
-  // const geometry = new THREE.SphereGeometry(diameter, 32, 32)
-  // const material = new THREE.MeshBasicMaterial({
-  //   color,
-  // })
-
-  // spheres[name] = new THREE.Mesh(geometry, material)
-  // spheres[name].position.set(position[0], position[1], position[2])
-  // window.debug.scene.add(spheres[name])
-}
-
 export class InverseKinematic {
   constructor(geometry) {
     this.OK = 0
@@ -110,7 +68,6 @@ export class InverseKinematic {
     J[5][0] = x
     J[5][1] = y
     J[5][2] = z
-    addSphere('J5', J[5])
 
 
     // ---- J4 ----
@@ -119,7 +76,6 @@ export class InverseKinematic {
     J[4][0] = x - this.V4_length_x_y_z * targetVectorZ[0]
     J[4][1] = y - this.V4_length_x_y_z * targetVectorZ[1]
     J[4][2] = z - this.V4_length_x_y_z * targetVectorZ[2]
-    addSphere('J4', J[4])
 
 
     // ---- R0 ----
@@ -133,10 +89,6 @@ export class InverseKinematic {
       R[0] += 2 * alphaR0 - Math.PI
     }
 
-    if (-this.J_initial_absolute[4][1] > this.length2(J[4][2], J[4][0])) {
-      Serial.println('out of reach')
-    }
-
 
     // ---- J1 ----
     // # R0
@@ -144,7 +96,6 @@ export class InverseKinematic {
     J[1][0] = Math.cos(R[0]) * this.geometry[0][0] + Math.sin(R[0]) * -this.geometry[0][1]
     J[1][1] = Math.sin(R[0]) * this.geometry[0][0] + Math.cos(R[0]) * this.geometry[0][1]
     J[1][2] = this.geometry[0][2]
-    addSphere('J1', J[1], 0x00ff00)
 
 
     // ---- rotate J4 into x,z plane ----
@@ -155,7 +106,6 @@ export class InverseKinematic {
     J4_x_z[0] = Math.cos(R[0]) * J[4][0] + Math.sin(R[0]) * J[4][1]
     J4_x_z[1] = Math.sin(R[0]) * J[4][0] + Math.cos(R[0]) * -J[4][1] // 0
     J4_x_z[2] = J[4][2]
-    addSphere('J4_x_z', J4_x_z, 0xff0000)
 
 
     // ---- J1J4_projected_length_square ----
@@ -206,12 +156,10 @@ export class InverseKinematic {
     J[2][0] = ta * tc + tb * e + ta * f * h - ta * -g * i + tb * j
     J[2][1] = -(-tb * tc + ta * e - tb * f * h + tb * -g * i + ta * j)
     J[2][2] = d + -g * h + f * i
-    addSphere('J2', J[2], 0x0000ff)
 
     J[3][0] = J[2][0] + ta * f * k * m - ta * -g * -l * m - ta * -g * k * n - ta * f * -l * n + tb * o
     J[3][1] = J[2][1] - (-tb * f * k * m + tb * -g * -l * m + tb * -g * k * n + tb * f * -l * n + ta * o)
     J[3][2] = J[2][2] + -g * k * m + f * -l * m + f * k * n + g * -l * n
-    addSphere('J3', J[3], 0x0000ff)
 
 
     // ---- J4J3 J4J5 ----
@@ -226,8 +174,6 @@ export class InverseKinematic {
 
     const J4J5_J4J3_normal_vector = this.cross(J4J5_vector, J4J3_vector)
 
-    addVectorArrow('normal J4', J[4], J4J5_J4J3_normal_vector, 0xbada55, 8)
-
     const ZY_parallel_aligned_vector = [
       10 * -Math.sin(R[0]),
       10 * Math.cos(R[0]),
@@ -235,9 +181,6 @@ export class InverseKinematic {
     ]
 
     const ZY_aligned_J4J3_normal_vector = this.cross(ZY_parallel_aligned_vector, J4J3_vector)
-
-    addVectorArrow('normal J4 Y_vectors', J[4], ZY_aligned_J4J3_normal_vector, 0xff00ff)
-    addVectorArrow('XZ_parallel_aligned_vector', J[4], ZY_parallel_aligned_vector, 0x11ff11)
 
     R[3] = this.angleBetween(J4J5_J4J3_normal_vector, ZY_parallel_aligned_vector, ZY_aligned_J4J3_normal_vector)
 

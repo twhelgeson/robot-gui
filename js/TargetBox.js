@@ -1,20 +1,10 @@
-import * as THREE from 'three';
+import * as THREE from 'three'
 import {MeshLine, MeshLineGeometry, MeshLineMaterial} from '@lume/three-meshline'
 import { OBB } from 'three/examples/jsm/math/OBB'
-import colors from '../config/colors';
+import colors from '../config/colors'
 
 export class TargetBox {
-    static colors = {
-        red: 0xff0000, 
-        green: 0x00ff00,
-        blue: 0x0000ff,
-        cyan: 0x00ffff,
-        yellow: 0xffff00,
-        orange: 0xff8800,
-        black: 0x000000,
-        magenta: 0xff00ff
-    }
-
+    // Define up as positive z for target boxes
     static upVector = new THREE.Vector3( 0, 0, 1 )
 
     constructor( position, rotation, scene, 
@@ -75,7 +65,6 @@ export class TargetBox {
         this.border = new MeshLine(borderGeometry, borderMaterial)
         this.box.add(this.border)
 
-
         // Add second border to show progress of cube
         const progressBorderMaterial = new MeshLineMaterial({		
             useMap: false,
@@ -88,7 +77,6 @@ export class TargetBox {
             transparent: true
         })
         this.progressBorder = new MeshLine( borderGeometry, progressBorderMaterial)
-        // this.box.add(this.progressBorder)
 
         // Add attachment point
         const attachmentGeometry = new THREE.SphereGeometry(0.3, 32, 16)
@@ -107,7 +95,7 @@ export class TargetBox {
 
         // Make vector represent orientation of box
         this.orientation = new THREE.Vector3().copy( TargetBox.upVector )
-        this.orientation.normalize();
+        this.orientation.normalize()
 
         const origin = new THREE.Vector3( 0, 0, 0 )
         const length = 1
@@ -171,7 +159,6 @@ export class TargetBox {
         this.mesh.userData.obb.rotation.setFromMatrix4( obbRotation4 )
         this.mesh.userData.obb.center.copy( obbPosition )
 
-                                // .applyMatrix4( this.mesh.matrixWorld )
         this.obbHelperMesh.position.copy( this.mesh.userData.obb.center )
         const obbHelperRotation = new THREE.Matrix4().setFromMatrix3( this.mesh.userData.obb.rotation )
         this.obbHelperMesh.setRotationFromMatrix( obbHelperRotation )
@@ -225,6 +212,7 @@ export class TargetBox {
     }
 }
 
+// Helper for creating borders around cubes
 function getCornersOfCube( min, max ) {
     const startingPoints = [ min, max ]
     let points = []

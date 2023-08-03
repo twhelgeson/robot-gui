@@ -83,7 +83,6 @@ let IK
 
 function updateIK(geometry) {
   const geo = Object.values(geometry).map((val, i, array) => [val.x, val.y, val.z])
-  // todo not optimal, since IK is a sideeffect
   IK = new Kinematic(geo)
 }
 
@@ -181,7 +180,7 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
     TCPpose,
   )
 
-  robotInvalid = false;
+  robotInvalid = false
 
   let angleKeys = Object.keys(angles)  
 
@@ -195,7 +194,6 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
        }
   }
 
-  // IK.calculateAngles(TCPpose[0], TCPpose[1], TCPpose[2], TCPpose[3], TCPpose[4], TCPpose[5], angles)
   if(!robotInvalid) {
     return Object.assign({}, state, {
       target: {

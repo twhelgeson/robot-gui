@@ -226,34 +226,5 @@ class StoreManager {
 }
 const storeManager = new StoreManager()
 
-export { storeManager }
 
-// s.commit('CHANGE_CONTROL_MODE', mode, (state, data) => {
-//     return [
-//       ...state, {
-//         controlMode: data,
-//       },
-//     ]
-//   })
-//   // global state (app state)
-// GlobalDataDomain.setMode(mode)
-//
-// function onChange(store, select, onChange) {
-//   let currentState;
-//
-//   function handleChange() {
-//     let nextState = select(store.getState());
-//     if (nextState !== currentState) {
-//       currentState = nextState;
-//       onChange(currentState);
-//     }
-//   }
-//
-//   let unsubscribe = store.subscribe(handleChange);
-//   handleChange();
-//   return unsubscribe;
-// }
-//
-// store.onChange(store, [state, Module.getState(), Module.getClicked()](state) => {
-//
-// })
+export { storeManager }

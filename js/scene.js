@@ -1,10 +1,5 @@
-import * as THREE from 'three';
-import { storeManager } from './State';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { TargetBox } from './targetBox';
-
-const THREEStore = storeManager.createStore('THREE', {})
+import * as THREE from 'three'
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
 
 
 /* SCENE SETUP */
@@ -26,14 +21,13 @@ const objectLoader = new THREE.ObjectLoader( manager )
 const rgbeLoader = new RGBELoader( manager )
 
 // display loading progress
-const progressBar = document.getElementById('progress-bar');
-const progressLabel = document.getElementById('progress-bar-label');
+const progressBar = document.getElementById('progress-bar')
+const progressLabel = document.getElementById('progress-bar-label')
 
 var loadingText = 'Loading...'
 manager.onProgress = function ( url, itemsLoaded, itemsTotal) {
 	const actualTotal = 34
 	progressBar.value = (itemsLoaded / actualTotal) * 100
-	// var text = 'Loaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.'
 	if(url.includes('robot_arm')) loadingText = 'Designing robot arm...'
 	if(url.includes('ISS.json')) loadingText = 'Sending space station into orbit...'
 	if(url.includes('HDRI_Orbital')) loadingText = 'Generating Earth...'
@@ -44,13 +38,9 @@ manager.onError = function ( url ) {
 	console.log( 'There was an error loading ' + url )
 }
 
-
-// For dev
-const axesHelper = new THREE.AxesHelper( 5 );
-// scene.add( axesHelper );
-
 // load background and space station
 loadEnv()
+
 
 /* HELPER FUNCTIONS */
 
@@ -58,9 +48,7 @@ function setupRenderer() {
 	renderer.setClearColor(0x333333)
 	renderer.outputColorSpace = THREE.SRGBColorSpace
 	renderer.setSize(window.innerWidth, window.innerHeight)
-	document.body.appendChild( renderer.domElement );
-	// renderer.shadowMap.enabled = false;
-	// renderer.shadowMap.type = THREE.PCFShadowMap
+	document.body.appendChild( renderer.domElement )
 }
 
 function setupLights() {
@@ -88,7 +76,7 @@ function loadEnv() {
 
 	rgbeLoader.load('RenderCrate-HDRI_Orbital_46_Sunset_4K.hdr', function(texture) {
 		texture.mapping = THREE.EquirectangularRefractionMapping
-		scene.background = texture;
+		scene.background = texture
 	})
 }
 

@@ -1,7 +1,7 @@
 import { storeManager } from './State'
 import { scene } from './scene'
 import { robotStore } from './Robot'
-import * as THREE from 'three';
+import * as THREE from 'three'
 import THREERobot from './THREERobot'
 
 const THREESimulationRobot = new THREE.Group()

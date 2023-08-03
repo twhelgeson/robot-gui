@@ -1,3 +1,4 @@
+// Defines colors for goal and target objects
 const colors = {
     goals: {
         goal_1: {

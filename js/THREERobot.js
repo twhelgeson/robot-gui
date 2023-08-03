@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { loadObject } from './scene'
 import { camera3 } from './camera'
-// import { scene } from './scene'
 
 import { OBB } from 'three/examples/jsm/math/OBB'
 
@@ -14,18 +13,7 @@ export default class THREERobot {
     this.robotBasicMeshes = []
     this.bbHelpers = []
 
-    const scope = this
-
     let parentObject = this.arm
-
-    const colors = [
-      0xaaaaaa,
-      0xbbbbbb,
-      0xbcbcbc,
-      0xcbcbcb,
-      0xcccccc,
-      0x00ff00,
-    ]
 
     function createCube(x, y, z, w, h, d, min, max, jointNumber, robotBasicMeshes) {
       const thicken = 0.35
@@ -36,13 +24,13 @@ export default class THREERobot {
 
       const material = new THREE.MeshBasicMaterial()
       const geometry = new THREE.BoxGeometry(w_thickened, h_thickened, d_thickened)
-      geometry.userData.obb = new OBB();
-      const size = new THREE.Vector3( w_thickened, h_thickened, d_thickened );
-			geometry.userData.obb.halfSize.copy( size ).multiplyScalar( 0.5 );
+      geometry.userData.obb = new OBB()
+      const size = new THREE.Vector3( w_thickened, h_thickened, d_thickened )
+			geometry.userData.obb.halfSize.copy( size ).multiplyScalar( 0.5 )
       const mesh = new THREE.Mesh(geometry, material)
-      mesh.userData.obb = new OBB();
-      mesh.userData.obb.copy( mesh.geometry.userData.obb );
-			mesh.userData.obb.applyMatrix4( mesh.matrixWorld );
+      mesh.userData.obb = new OBB()
+      mesh.userData.obb.copy( mesh.geometry.userData.obb )
+			mesh.userData.obb.applyMatrix4( mesh.matrixWorld )
       
       mesh.material.alphaMap = 0x0
       mesh.material.opacity = 0
@@ -93,7 +81,7 @@ export default class THREERobot {
           zpos -= 1.3
 
           camera3.lookAt(0, 0, 20)
-          group.add(camera3);
+          group.add(camera3)
           camera3.position.set(-0.1, 1, -1.7)
           break
       }
@@ -141,7 +129,6 @@ export default class THREERobot {
       cube.position.copy(mesh.userData.obb.center)
       cube.setRotationFromMatrix(rotation4)
       this.bbHelpers.push(cube)
-      // scene.add(cube)
     }
 
   }

@@ -1,11 +1,9 @@
-import { RobotController } from "./RobotController";
-import { storeManager } from "./State";
+import { RobotController } from "./RobotController"
+import { storeManager } from "./State"
 
 var robotStore = storeManager.getStore('Robot')
 
 export const robotController = new RobotController(robotStore, 0.1, (Math.PI)/36)
-
-var target = storeManager.getStore('Target').getState()
 
 let keys = {
   "w": false,
