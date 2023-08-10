@@ -78,6 +78,7 @@ const defaultRobotState = {
   },
 }
 const robotStore = storeManager.createStore('Robot', defaultRobotState)
+const orientationWarn = document.getElementById("orientation-warning")
 
 let IK
 
@@ -146,6 +147,7 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
   }
 
   if(!robotInvalid) {
+    orientationWarn.style.display = "none"
     return Object.assign({}, state, {
       target: {
         position: Object.assign({}, data.position),
@@ -164,6 +166,7 @@ robotStore.action('ROBOT_CHANGE_TARGET', (state, data) => {
       jointOutOfBound: [...outOfBounds],
     })
   } else {
+    orientationWarn.style.display = "block"
     return Object.assign({}, state, state)
   }
 })
@@ -195,6 +198,7 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
   }
 
   if(!robotInvalid) {
+    orientationWarn.style.display = "none"
     return Object.assign({}, state, {
       target: {
         position: {
@@ -219,6 +223,7 @@ robotStore.action('ROBOT_CHANGE_ANGLES', (state, angles) => {
       },
     })
   } else {
+    orientationWarn.style.display = "block"
     return Object.assign({}, state, state)
   }
 })

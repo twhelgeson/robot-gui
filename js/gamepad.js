@@ -82,7 +82,7 @@ const eeLimits = {
         z: [-7.5, 7.5]
     },
     rotation: {
-        x: [ 0, 2*Math.PI ],
+        x: [ -2*Math.PI, 0 ],
         y: [ -(Math.PI), Math.PI ],
         z: [ -(Math.PI), Math.PI ]
     }

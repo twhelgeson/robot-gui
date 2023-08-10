@@ -66,6 +66,11 @@
 				transform: translateY(-50%);
 				font-size: 1.25rem;
 			}
+
+			#orientation-warning {
+				background: rgba(255, 0, 0, 0.7);
+				color: white;
+			}
  
 			.progress-bar-container {
 				position: absolute;
@@ -125,6 +130,7 @@
 
 	<div class="info initial-gui notification" id="gamepad-warning">Please plug in your human interface device and press any button to connect</div>
 	<div class="info notification" id="gamepad-connected">"Arduino Leonardo" connected</div>
+	<div class="info notification" id="orientation-warning">The arm can't reach that orientation!</div>
 
 	<div class="info initial-gui" id="divider-one"></div>
 	<div class="info initial-gui" id="divider-two"></div>
