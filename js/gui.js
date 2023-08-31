@@ -141,7 +141,15 @@ function addFolders( object, gui ){
         const folder = object[ folderName ]
         if( typeof(folder) !== "object" ) continue
 
-        const guiFolder = gui.addFolder( folderName )
+        var guiFolder
+        if( folderName === "Axis Controls" || folderName === "Angle Controls" ) {
+            guiFolder = gui.addFolder( "Continuous Controls" )
+        } else if ( folderName === "Incremental Controls" ) {
+            guiFolder = gui.addFolder( "Discrete Controls" )
+        } else {
+            guiFolder = gui.addFolder( folderName )
+        }
+
         folders[ folderName ] = addFolders( folder, guiFolder )
         folders[ folderName ][ "folder" ] = guiFolder
 
