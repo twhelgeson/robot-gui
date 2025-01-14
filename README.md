@@ -3,6 +3,8 @@ A web-based robotic arm simulator based on the [Japanese Experiment Module Remot
 
 The simulator is hosted at <https://websites.umich.edu/~rob204labs/>.
 
+Forked from <https://github.com/glumb/robot-gui>.
+
 ## Installation
 1. Clone this repository.
 
